@@ -247,8 +247,8 @@ Class SQLBINDPARAM extends SQL {
             # code...
             ${$key} = $value;
             $bindValue = $key;
-            //$bindParamdata = "bindParam(:{$bindValue}, $$bindValue) == ".$$bindValue; //this is for debugging purposes
-            #echo "\$bindParamdata = $bindParamdata <br>";
+            $bindParamdata = "bindParam(:{$bindValue}, $$bindValue) == ".$$bindValue; //this is for debugging purposes
+            echo "\$bindParamdata = $bindParamdata <br>";
             #########################################################
             # this line not successful, how to check in the future
             //  $stmt->bindParam(":$key", $value);
