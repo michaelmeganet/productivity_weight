@@ -74,7 +74,8 @@ $tbldata = 'production_scheduling_' . $period;
 $tbloutput = 'production_output_' . $period;
 //echo "tbldata = $tbldata;;  tbloutput = $tbloutput";
 $qr = "SELECT * FROM $tbldata ORDER BY sid";
-$objSQL = new SQL($qr);
+echo "\$qr = $qr <br>" ;
+$objSQL = new SQL($qr); 
 $results = $objSQL->getResultRowArray();
 $arr_mainLog = array();
 $count = 0;
@@ -110,11 +111,12 @@ try{
         $date_issue = $datarow['date_issue'];
         $completion_date = $datarow['completion_date'];
         $status = $datarow['status'];
-        $packings = $datarow['packings'];
+        $packing = $datarow['packing'];
         $operation = $datarow['operation'];
         //echo "sid = $sid<br>";
         $qid = $datarow['qid'];
         $quantity = $datarow['quantity'];
+        $company = 'PST';
         $fdt = $datarow['fdt'];
         $fdl = $datarow['fdl'];
         $fdw = $datarow['fdw'];
@@ -122,6 +124,8 @@ try{
         $cid = $datarow['cid'];
         $com = strtolower(trim($datarow['company']));
         $materialcode = $datarow['grade'];
+        echo "\$materialcode = $materialcode <br>";
+
         $cuttingtype = $datarow['cuttingtype'];
         $quantity = $datarow['quantity'];
         // if(isset($weight)){
@@ -148,7 +152,12 @@ try{
             $fdl = $datarow['mdl'];
         }
         $dimension_array_legacy = array('mdt' => $fdt, 'mdw' => $fdw, 'mdl' => $fdl, 'quantity' => $quantity);
+        echo "<br>";
+        print_r($dimension_array_legacy);
+        echo "<br>";
         if ($materialcode != 'hk2p') {
+
+            echo "\$cid = $cid, \$com = $com , \$materialcode = $materialcode <br>";
             $obj = new MATERIAL_SPECIAL_PRICE_CID($cid, $com, $materialcode, $dimension_array_legacy);
             $weight = $obj->getWeight();
         } else {
@@ -198,13 +207,14 @@ try{
         if (isset($staffid)) {
             //Get Staff Detail
             $qr3 = "SELECT * FROM admin_staff WHERE staffid = '$staffid'";
+            echo "\$qr3 = $qr3 <br>";
             $objSQL3 = new SQL($qr3);
             $results3 = $objSQL3->getResultOneRowArray();
             $staffname = $results3['name'];
         } else {
             $staffname = null;
         }
-    //  echo "staffname = $staffname<br>";
+      echo "staffname = $staffname<br>";
 
         if (isset($mcid)) {
             //Get Machine Data
