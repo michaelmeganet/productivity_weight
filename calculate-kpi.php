@@ -111,8 +111,10 @@ foreach($namelist as $array) {
         try{
             foreach ($results as $datarow) {
                 $count++;
-                $index_gain_in_kg = floatval($index_gain_in_kg);
-                $index_gain = $index_gain + $index_gain_in_kg;
+                if(isset($index_gain_in_kg)){
+                    $index_gain_in_kg = floatval($index_gain_in_kg);
+                    $index_gain = $index_gain + $index_gain_in_kg;
+                }
                 #echo "<pre>Current data : <br>";
                 #print_r($datarow);
                 #echo "<br></pre><br>";
