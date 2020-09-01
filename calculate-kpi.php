@@ -111,10 +111,7 @@ foreach($namelist as $array) {
         try{
             foreach ($results as $datarow) {
                 $count++;
-                if(isset($index_gain_in_kg)){
-                    $index_gain_in_kg = floatval($index_gain_in_kg);
-                    $index_gain = $index_gain + $index_gain_in_kg;
-                }
+
                 #echo "<pre>Current data : <br>";
                 #print_r($datarow);
                 #echo "<br></pre><br>";
@@ -138,6 +135,10 @@ foreach($namelist as $array) {
                 $model = $datarow['model'];
                 $index_gain_in_kg = $total_weight * $quantity;
                 $index_per_shift = $datarow['index_per_shift'];
+                if(isset($index_gain_in_kg)){
+                    $index_gain_in_kg = floatval($index_gain_in_kg);
+                    $index_gain = $index_gain + $index_gain_in_kg;
+                }
         
                 
             echo 
@@ -175,6 +176,7 @@ foreach($namelist as $array) {
                 $KPI_weekday = "no value";
                 $KPI_holiday = "no value";
             }
+
             echo "The total index gain in KG for $value is $index_gain <br>";
             echo "The index per shift of $model, $machineModel is $index_per_shift <br> ";
             echo "The weekday KPI is $KPI_weekday <br>";
