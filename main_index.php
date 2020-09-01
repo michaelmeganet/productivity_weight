@@ -43,7 +43,7 @@ function callSqlInsert($insertArray,$table) {
 
         ${$key} = trim($value);
         $columnHeader = $key; // creates new variable based on $key values
-        //echo $columnHeader." = ".$$columnHeader."<br>";
+        echo $columnHeader." = ".$$columnHeader."<br>";
 
         /* $dbg->review($columnHeader." = ".$$columnHeader."<br>"); */ //this is for debugging, not yet implemented
 
@@ -123,16 +123,21 @@ try{
         $com = strtolower(trim($datarow['company']));
         $materialcode = $datarow['grade'];
         $cuttingtype = $datarow['cuttingtype'];
-        if(isset($weight)){
-            if($weight > 0){
-                $totalweight = $weight * $quantity;
-            }else{
-                $totalweight = 0;
-            }
-        } else {
-            $weight = 0;
-            $totalweight = 0;
-        }
+        $quantity = $datarow['quantity'];
+        // if(isset($weight)){
+        //     $weight = floatval($weight) ;
+        //     if(floatval($weight) > 0.00){
+        //         echo "Line 128 in \$weight > 0 <br>";
+        //         $total_weight = $weight * $quantity;
+        //     }else{
+        //         echo "Line 131 in \$weight <= 0 <br>";
+        //         $total_weight = 0;
+        //     }
+        // } else {
+        //     $weight = 0;
+        //     $total_weight = 0;
+        // }
+
         if ($fdt == 0 && $materialcode != 'hk2p') { // If no finishing, then finishing is same as raw
             $fdt = $datarow['mdt'];
         }
@@ -149,20 +154,23 @@ try{
         } else {
             $weight = (float) 0.00;
         }
-    // echo "<b>quono - $quono </b> , grade = $grade ,   $dimension <br>";
-    // echo "<b> Weight = $weight; </b><br>";
+        $weight = floatval($weight);
+        $total_weight = floatval($weight) * floatval($quantity);
+   echo "<b>quono - $quono </b> , grade = $grade ,   $dimension <br>";
+   echo "<b> Weight = $weight , Totalweight = $total_weight</b><br>";
         //Get Start_By Staff ID
         $qr2 = "SELECT * FROM $tbloutput WHERE sid = $sid AND NOT jobtype = 'jobtake' ORDER BY poid";
         $objSQL2 = new SQL($qr2);
         $results2 = $objSQL2->getResultOneRowArray();
         if (!empty($results2)) {
             $staffid = $results2['start_by'];
-            $startdate = $results2['date_start'];
+            //$startdate = $results2['date_start'];
+            $date_start = $results2['date_start'];
             $enddate = $results2['date_end'];
             $mcid = $results2['machine_id'];
-            $day = date_format(date_create($startdate), 'l');
-            $date = date_format(date_create($startdate), 'd-m-Y');
-            $netdatetime = strtotime($enddate) - strtotime($startdate);
+            $day = date_format(date_create($date_start), 'l');
+            $date = date_format(date_create($date_start), 'd-m-Y');
+            $netdatetime = strtotime($enddate) - strtotime($date_start);
             $workhourval = $netdatetime / 3600;
             $workhouronly = floor($workhourval);
             $workhourremainder = $workhourval - $workhouronly;
@@ -175,7 +183,7 @@ try{
         //   echo "workhour = " . $workhour . "<br>";
         } else {
             $staffid = null;
-            $startdate = null;
+            $date_start = null;
             $enddate = null;
             $day = null;
             $date = null;
@@ -205,9 +213,14 @@ try{
             $results4 = $objSQL4->getResultOneRowArray();
             $machineid = $results4['machineid'];
             $machineModel = $results4['name'];
+            $model = $results4['model'];
+            $index_per_hour = $results4['index_per_hour'];
+            $index_per_shift = $index_per_hour * 8;
         } else {
             $machineid = null;
             $machineModel = null;
+            $model = null;
+            $index_per_shift = null;
         }
     // echo "machineModel - $machineModel<br>";
 
@@ -237,48 +250,52 @@ try{
     }
     // echo 
     // "<tr>
-    //         <td>$sid</td><td>$quono</td><td>$materialcode</td><td>$quantity</td><td>$weight</td><td>$totalweight</td><td>$dimension</td><td>$jlfor</td><td>$runningno</td>
+    //         <td>$sid</td><td>$quono</td><td>$materialcode</td><td>$quantity</td><td>$weight</td><td>$total_weight</td><td>$dimension</td><td>$jlfor</td><td>$runningno</td>
     //         <td>$jobno</td><td>$dateofcompletion</td><td>$cid</td><td>$cuttingtype</td><td>$staffname</td><td>$machineModel</td>
-    //         <td>$startdate</td>
+    //         <td>$date_start</td>
     
     // </tr>";
     echo "qid = $qid | quono = $quono | company = $company | cid = $cid | quantity = $quantity | grade = $grade | "
          . " dimension = $dimension | process = $process | cuttingtype = $cuttingtype  | cncmach = $cncmach | " 
          ." noposition = $noposition | runningno = $runningno | jobno = $jobno | date_issue = $date_issue | "
          . " completion_date = $completion_date | dateofcompletion = $dateofcompletion | jlfor = $jlfor | status = $status | "
-         . " date_start = $startdate | packing = $packing  | operation = $operation | unit_weight = $weight | "
-         . " total_weight = $totalweight |<br>";
+         . " staffname = $staffname |  machineModel  = $machineModel | model = $model | date_start = $date_start | packing = $packing  | operation = $operation | unit_weight = $weight | "
+         . " total_weight = $total_weight | index_per_shift = $index_per_shift <br>";
     echo"################################################################################<br>";
-    $insertArray["wid"] = '';
+    $insertArray["wid"] = null;
     $insertArray["qid"] = $qid;
-    $insertArray["quono"] = "$quono";
-    $insertArray["company"] = "$company";
+    $insertArray["quono"] = $quono;
+    $insertArray["company"] = 'PST';
     $insertArray["cid"] = $cid;
     $insertArray["quantity"] = $quantity;
-    $insertArray["grade"] = "$grade";
-    $insertArray["dimension"] = "$dimension";
-    $insertArray["process"] = "$process";
-    $insertArray["cuttingtype"] = "$cuttingtype";
+    $insertArray["grade"] = $grade;
+    $insertArray["dimension"] = $dimension;
+    $insertArray["process"] = $process;
+    $insertArray["cuttingtype"] = $cuttingtype;
     $insertArray["cncmach"] = $cncmach;
     $insertArray["noposition"] = $noposition;
-    $insertArray["runningno"] = "$runningno";
-    $insertArray["jobno"] = "$jobno";
-    $insertArray["date_issue"] = "$date_issue";
-    $insertArray["completion_date"] = "$completion_date";
-    $insertArray["dateofcompletion"] = "$dateofcompletion";
-    $insertArray["jlfor"] = "$jlfor";
-    $insertArray["status"] = "$status";
-    $insertArray["date_start"] = "$startdate";
-    $insertArray["packing"] = "$packing";
+    $insertArray["runningno"] = $runningno;
+    $insertArray["jobno"] = $jobno;
+    $insertArray["date_issue"] = $date_issue;
+    $insertArray["completion_date"] = $completion_date;
+    $insertArray["dateofcompletion"] = $dateofcompletion;
+    $insertArray["jlfor"] = $jlfor;
+    $insertArray["status"] = $status;
+    $insertArray["staffname"] = $staffname;
+    $insertArray["machineModel"] = $machineModel;
+    $insertArray["model"] = $model;
+    $insertArray["date_start"] = $date_start;
+    $insertArray["packing"] = $packing;
     $insertArray["operation"] = $operation;
     $insertArray["unit_weight"] = $weight;
-    $insertArray["total_weight"] = $totalweight;
+    $insertArray["total_weight"] = $total_weight;
+    $insertArray["index_per_shift"] = $index_per_shift;
     print_r($insertArray);
     echo "<br>";
     echo "insert an array into $table <br>";
     $insertResult = callSqlInsert($insertArray,$table) ;
-    echo "The insert result is ".$insertResult;
-    
+    echo "The insert result is ".$insertResult."<br>";
+    echo "#####################################################################################<br>";
     }
 
 }

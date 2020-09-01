@@ -37,6 +37,9 @@ and open the template in the editor.
                
             
         </div>
+        <div>
+        <a href="./calculate-kpi.php">get kpi page</a>     
+       </div>
         <script>
             var logVue = new Vue({
                 el: '#mainLog',
