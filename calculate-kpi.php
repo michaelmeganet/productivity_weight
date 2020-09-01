@@ -111,6 +111,7 @@ foreach($namelist as $array) {
         try{
             foreach ($results as $datarow) {
                 $count++;
+                $index_gain_in_kg = floatval($index_gain_in_kg);
                 $index_gain = $index_gain + $index_gain_in_kg;
                 #echo "<pre>Current data : <br>";
                 #print_r($datarow);
@@ -123,7 +124,7 @@ foreach($namelist as $array) {
                 $total_weight = $datarow['total_weight'];
                 $dimension = $datarow['dimension'];
                 $jlfor = $datarow['jlfor'];
-                $runningno = $datarow['runningnno'];
+                //$runningno = $datarow['runningnno'];
                 $jobno = $datarow['jobno'];
                 $dateofcompletion = $datarow['dateofcompletion'];
                 $cid = $datarow['cid'];
