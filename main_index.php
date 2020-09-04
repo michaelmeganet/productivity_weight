@@ -64,8 +64,8 @@
             return $result;
         }
 
-        function search_output_data($outputTbl, $qid, $quono, $cid) {
-            $qr = "SELECT * FROM $outputTbl WHERE qid = $qid AND quono = '$quono' AND cid = $cid";
+        function search_output_data($outputTbl, $sid, $qid, $quono, $cid) {
+            $qr = "SELECT * FROM $outputTbl WHERE sid = $sid AND qid = $qid AND quono = '$quono' AND cid = $cid";
             $objSQL = new SQL($qr);
             
             $results = $objSQL->getResultOneRowArray();
@@ -88,7 +88,7 @@
         $tbldata = 'production_scheduling_' . $period;
         $tbloutput = 'production_output_' . $period;
 //echo "tbldata = $tbldata;;  tbloutput = $tbloutput";
-        $qr = "SELECT * FROM $tbldata WHERE status NOT LIKE '%cancelled%' ORDER BY sid";
+        $qr = "SELECT * FROM $tbldata WHERE status NOT LIKE '%billing%' ORDER BY sid";
         echo "\$qr = $qr <br>";
         $objSQL = new SQL($qr);
         $results = $objSQL->getResultRowArray();
@@ -119,17 +119,14 @@
                     $qid = $datarow['qid']; //--> check if this exists or not
                     $quono = $datarow['quono']; //--> check if this exists or not
                     $cid = $datarow['cid']; //--> check if this exists or not
+                    $sid = $datarow['sid'];
                     
-                    //Begin check for qid, quono, and cid
-                    search_output_data($table, $qid, $quono, $cid); //--> this checks if the data already exists or not,
-                    //end check
                     
                     $jlfor = $datarow['jlfor'];
                     $dateofcompletion = $datarow['dateofcompletion'];
                     $runningno = $datarow['runningno'];
                     $jobno = $datarow['jobno'];
                     $grade = $datarow['grade'];
-                    $sid = $datarow['sid'];
                     //echo "sid = $sid<br>";
                     $process = $datarow['process'];
                     $cncmach = $datarow['cncmach'];
@@ -151,6 +148,11 @@
 
                     $cuttingtype = $datarow['cuttingtype'];
                     $quantity = $datarow['quantity'];
+                    
+                    //Begin check for qid, quono, and cid
+                    search_output_data($table, $sid, $qid, $quono, $cid); //--> this checks if the data already exists or not,
+                    //end check
+                    
                     // if(isset($weight)){
                     //     $weight = floatval($weight) ;
                     //     if(floatval($weight) > 0.00){
@@ -293,6 +295,7 @@
                     . " total_weight = $total_weight | index_per_shift = $index_per_shift <br>";
                     echo"################################################################################<br>";
                     $insertArray["wid"] = null;
+                    $insertArray["sid"] = $sid;
                     $insertArray["qid"] = $qid;
                     $insertArray["quono"] = $quono;
                     $insertArray["company"] = 'PST';
@@ -327,7 +330,7 @@
                     echo "The insert result is " . $insertResult . "<br>";
                     echo "#####################################################################################<br>";
                 } catch (Exception $ex) {
-                    echo "Item : qid = $qid; quono = $quono; cid = $cid<br>".$ex->getMessage()."<br><br>";
+                    echo "Item : sid = $sid; qid = $qid; quono = $quono; cid = $cid<br>".$ex->getMessage()."<br><br>"; 
                 }
             }
         } catch (Exception $e) {
