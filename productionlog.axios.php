@@ -56,9 +56,15 @@ switch ($action) {
     case 'getUnFinJobList':
         $period = $received_data->period;
         $status = $received_data->status;
+        $manual = $received_data->manual;
         $proschtab = "production_scheduling_".$period;
         
         $qr = "SELECT * FROM $proschtab WHERE dateofcompletion IS NULL AND status = '$status'";
+        if ($manual == 'yes'){
+            $qr .= " AND MID(quono,10,3) LIKE 'M%'";
+        }elseif($manual == 'no'){
+            $qr .= " AND MID(quono,10,3) NOT LIKE 'M%'";            
+        }
         #echo $qr;
         $objSQL = new SQL($qr);
         $unfinData = $objSQL->getResultRowArray();
@@ -67,9 +73,15 @@ switch ($action) {
     case 'getFinJobList':
         $period = $received_data->period;
         $status = $received_data->status;
+        $manual = $received_data->manual;
         $proschtab = "production_scheduling_".$period;
         
         $qr = "SELECT * FROM $proschtab WHERE dateofcompletion IS NOT NULL AND status = '$status'";
+        if ($manual == 'yes'){
+            $qr .= " AND MID(quono,10,3) LIKE 'M%'";
+        }elseif($manual == 'no'){
+            $qr .= " AND MID(quono,10,3) NOT LIKE 'M%'";            
+        }
         $objSQL = new SQL($qr);
         $finData = $objSQL->getResultRowArray();
         echo json_encode($finData);

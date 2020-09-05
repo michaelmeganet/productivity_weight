@@ -21,6 +21,12 @@ and open the template in the editor.
                     <option v-for='data in periodList' v-bind:value='data'>{{data}}</option>
                 </select>
                 <br>
+                <label> Is Manual?      : </label>
+                <select id="manual" name="manual" v-model="manual"  @change=''>
+                    <option value="yes">Yes</option>
+                    <option value="no">No </option>
+                </select>
+                <br>
                 <label> Status      : </label>
                 <select id="status" name="status" v-model="status"  @change='getAllJobList()'>
                     <option value="active">Active Jobs</option>
@@ -261,6 +267,7 @@ var schOutVue = new Vue({
 
         //selection variables
         period: '',
+        manual: '',
         status: '',
         jobfintype: '',
         unfinJob: '',
@@ -295,10 +302,12 @@ var schOutVue = new Vue({
         getUnFinJobList: function () {
             let period = this.period;
             let status = this.status;
+            let manual = this.manual;
             axios.post(this.phpajaxresponsefile, {
                 action: 'getUnFinJobList',
                 period: period,
-                status: status
+                status: status,
+                manual: manual
             }).then(function (response) {
                 console.log('ongetUnFinJobList Function...');
                 console.log(response.data);
@@ -308,10 +317,12 @@ var schOutVue = new Vue({
         getFinJobList: function () {
             let period = this.period;
             let status = this.status;
+            let manual = this.manual;
             axios.post(this.phpajaxresponsefile, {
                 action: 'getFinJobList',
                 period: period,
-                status: status
+                status: status,
+                manual: manual
             }).then(function (response) {
                 console.log('ongetFinJobList Function...');
                 console.log(response.data);
@@ -388,18 +399,18 @@ var schOutVue = new Vue({
                                     console.log('Jobtake Exist');
                                     if (finJobListOutput.length > 1) {
                                         console.log('There\'s otherJob other thanjobtake ');
-                                        finJobInfo = 'Joblist has been ended properly';
+                                        finJobInfo = 'Joblist has been started and ended properly';
                                     } else {
                                         console.log('there\'s only jobtake');
-                                        finJobInfo = 'Joblist has been ended, Without scanned in production!!!';
+                                        finJobInfo = 'Joblist has been ended, Without scanned in production area';
                                     }
                                 } else {
                                     console.log('there\'s no jobtake');
-                                    finJobInfo = 'Joblist has been ended, Without started by Admin!!!';
+                                    finJobInfo = 'Joblist has been ended, Without started by Production Admin';
                                 }
                             } else {
                                 console.log('Joblist output is empty');
-                                finJobInfo = 'Joblist has been ended, Without started by Admin and without scanned in production!!!';
+                                finJobInfo = 'Joblist has been ended, Without started by Production Admin and without scanned in production area';
                             }
 
                             break;
@@ -417,11 +428,11 @@ var schOutVue = new Vue({
                                         finJobInfo = 'Joblist is in process';
                                     } else {
                                         console.log('There\'s only jobtake');
-                                        finJobInfo = 'Joblist just printed by Admin.';
+                                        finJobInfo = 'Joblist just printed by Production Admin.';
                                     }
                                 } else {
                                     console.log('There\'s no jobtake');
-                                    finJobInfo = 'Joblist is in process, without started by Admin!!!';
+                                    finJobInfo = 'Joblist is in process, without started by Production Admin';
                                 }
                             } else {
                                 console.log('Joblist Output is empty');
