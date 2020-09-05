@@ -33,6 +33,7 @@ and open the template in the editor.
                     <option value="unfinished">Un-Finished Jobs</option>
                     <option value="finished">Finished Jobs</option>
                 </select>
+                <button id='refData' name='refData' @click='getAllJobList()' v-if='period != "" && status != "" && jobfintype != "" ' >Refresh Data</button>
             </div>
             <br>
 
