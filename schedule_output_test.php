@@ -44,6 +44,7 @@ and open the template in the editor.
                     <table>
                         <thead>
                             <tr>
+                                <th>POID</th>
                                 <th>SID</th>
                                 <th>Job Type</th>
                                 <th>Start Date</th>
@@ -79,6 +80,7 @@ and open the template in the editor.
                     <table>
                         <thead>
                             <tr>
+                                <th>POID</th>
                                 <th>SID</th>
                                 <th>Job Type</th>
                                 <th>Start Date</th>
