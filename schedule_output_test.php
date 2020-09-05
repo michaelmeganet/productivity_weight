@@ -17,8 +17,15 @@ and open the template in the editor.
         <div id="mainArea">
             <div>
                 <label> Select Period : </label>
-                <select id="period" name='period' v-model='period' @change='getAllJobList()'>
+                <select id="period" name='period' v-model='period'>
                     <option v-for='data in periodList' v-bind:value='data'>{{data}}</option>
+                </select>
+                <br>
+                <label> Status      : </label>
+                <select id="status" name="status" v-model="status"  @change='getAllJobList()'>
+                    <option value="active">Active Jobs</option>
+                    <option value="billing">Billing Jobs</option>
+                    <option value="cancelled">Cancelled Jobs</option>
                 </select>
                 <br>
                 <label> Job Type      : </label>
@@ -248,6 +255,7 @@ var schOutVue = new Vue({
 
         //selection variables
         period: '',
+        status: '',
         jobfintype: '',
         unfinJob: '',
         finJob: '',
@@ -279,9 +287,11 @@ var schOutVue = new Vue({
         },
         getUnFinJobList: function () {
             let period = this.period;
+            let status = this.status;
             axios.post(this.phpajaxresponsefile, {
                 action: 'getUnFinJobList',
-                period: period
+                period: period,
+                status: status
             }).then(function (response) {
                 console.log('ongetUnFinJobList Function...');
                 console.log(response.data);
@@ -290,9 +300,11 @@ var schOutVue = new Vue({
         },
         getFinJobList: function () {
             let period = this.period;
+            let status = this.status;
             axios.post(this.phpajaxresponsefile, {
                 action: 'getFinJobList',
-                period: period
+                period: period,
+                status: status
             }).then(function (response) {
                 console.log('ongetFinJobList Function...');
                 console.log(response.data);

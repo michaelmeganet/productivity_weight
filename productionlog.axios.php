@@ -17,7 +17,7 @@ function debug_to_console($data) {
     }
 }
 
-function get_job_detail($period,$sid){
+function get_job_output($period,$sid){
     $proouttab = "production_output_".$period;
     $qr = "SELECT * FROM $proouttab WHERE sid = $sid";
     $objSQL = new SQL($qr);
@@ -55,18 +55,21 @@ switch ($action) {
         break;
     case 'getUnFinJobList':
         $period = $received_data->period;
+        $status = $received_data->status;
         $proschtab = "production_scheduling_".$period;
         
-        $qr = "SELECT * FROM $proschtab WHERE dateofcompletion IS NULL";
+        $qr = "SELECT * FROM $proschtab WHERE dateofcompletion IS NULL AND status = '$status'";
+        #echo $qr;
         $objSQL = new SQL($qr);
         $unfinData = $objSQL->getResultRowArray();
         echo json_encode($unfinData);
         break;
     case 'getFinJobList':
         $period = $received_data->period;
+        $status = $received_data->status;
         $proschtab = "production_scheduling_".$period;
         
-        $qr = "SELECT * FROM $proschtab WHERE dateofcompletion IS NOT NULL";
+        $qr = "SELECT * FROM $proschtab WHERE dateofcompletion IS NOT NULL AND status = '$status'";
         $objSQL = new SQL($qr);
         $finData = $objSQL->getResultRowArray();
         echo json_encode($finData);
@@ -74,14 +77,14 @@ switch ($action) {
     case 'getUnFinJobOutput':
         $period = $received_data->period;
         $sid = $received_data->sid;
-        $detailData = get_job_detail($period, $sid);
+        $detailData = get_job_output($period, $sid);
         
         echo json_encode($detailData);
         break;
     case 'getFinJobOutput':
         $period = $received_data->period;
         $sid = $received_data->sid;
-        $detailData = get_job_detail($period, $sid);
+        $detailData = get_job_output($period, $sid);
         
         echo json_encode($detailData);
         break;
