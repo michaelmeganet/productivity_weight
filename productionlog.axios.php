@@ -17,18 +17,38 @@ function debug_to_console($data) {
     }
 }
 
-function get_job_output($period,$sid){
-    $proouttab = "production_output_".$period;
+function get_adminstaff_name($staffid) {
+    if ($staffid != '') {
+        $qr2 = "SELECT name FROM admin_staff WHERE staffid = '$staffid'";
+        #echo $qr2;
+        $objSQL2 = new SQL($qr2);
+        $result = $objSQL2->getResultOneRowArray();
+        #print_r($result);
+        return $result['name'];
+    } else {
+        return '';
+    }
+}
+
+function get_job_output($period, $sid) {
+    $proouttab = "production_output_" . $period;
     $qr = "SELECT * FROM $proouttab WHERE sid = $sid";
     $objSQL = new SQL($qr);
     $results = $objSQL->getResultRowArray();
+    foreach ($results as $key => $val) {
+        $start_by = get_adminstaff_name($val['start_by']);
+        $end_by = get_adminstaff_name($val['end_by']);
+        $results[$key]['start_by'] = $start_by;
+        $results[$key]['end_by'] = $end_by;
+    }
     #echo $qr;
-    if (!empty($results)){
+    if (!empty($results)) {
         return $results;
-    }else{
+    } else {
         return "empty";
     }
 }
+
 $received_data = json_decode(file_get_contents("php://input"));
 // print_r($received_data);
 // echo "<br>";
@@ -57,13 +77,16 @@ switch ($action) {
         $period = $received_data->period;
         $status = $received_data->status;
         $manual = $received_data->manual;
-        $proschtab = "production_scheduling_".$period;
-        
-        $qr = "SELECT * FROM $proschtab WHERE dateofcompletion IS NULL AND status = '$status'";
-        if ($manual == 'yes'){
+        $proschtab = "production_scheduling_" . $period;
+
+        $qr = "SELECT * , premachining.`process` as processname "
+                . "FROM $proschtab LEFT JOIN premachining "
+                . "ON $proschtab.process = premachining.pmid "
+                . "WHERE dateofcompletion IS NULL AND status = '$status'";
+        if ($manual == 'yes') {
             $qr .= " AND MID(quono,10,3) LIKE 'M%'";
-        }elseif($manual == 'no'){
-            $qr .= " AND MID(quono,10,3) NOT LIKE 'M%'";            
+        } elseif ($manual == 'no') {
+            $qr .= " AND MID(quono,10,3) NOT LIKE 'M%'";
         }
         #echo $qr;
         $objSQL = new SQL($qr);
@@ -74,13 +97,16 @@ switch ($action) {
         $period = $received_data->period;
         $status = $received_data->status;
         $manual = $received_data->manual;
-        $proschtab = "production_scheduling_".$period;
-        
-        $qr = "SELECT * FROM $proschtab WHERE dateofcompletion IS NOT NULL AND status = '$status'";
-        if ($manual == 'yes'){
+        $proschtab = "production_scheduling_" . $period;
+
+        $qr = "SELECT *, premachining.`process` as processname "
+                . "FROM $proschtab LEFT JOIN premachining "
+                . "ON $proschtab.process = premachining.pmid "
+                . "WHERE dateofcompletion IS NOT NULL AND status = '$status'";
+        if ($manual == 'yes') {
             $qr .= " AND MID(quono,10,3) LIKE 'M%'";
-        }elseif($manual == 'no'){
-            $qr .= " AND MID(quono,10,3) NOT LIKE 'M%'";            
+        } elseif ($manual == 'no') {
+            $qr .= " AND MID(quono,10,3) NOT LIKE 'M%'";
         }
         $objSQL = new SQL($qr);
         $finData = $objSQL->getResultRowArray();
@@ -90,14 +116,14 @@ switch ($action) {
         $period = $received_data->period;
         $sid = $received_data->sid;
         $detailData = get_job_output($period, $sid);
-        
+
         echo json_encode($detailData);
         break;
     case 'getFinJobOutput':
         $period = $received_data->period;
         $sid = $received_data->sid;
         $detailData = get_job_output($period, $sid);
-        
+
         echo json_encode($detailData);
         break;
     default:

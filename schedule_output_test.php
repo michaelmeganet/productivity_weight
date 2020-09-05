@@ -102,7 +102,7 @@ and open the template in the editor.
                                         <td style="border:1px;border-style:solid">{{data.fdt}}</td>
                                         <td style="border:1px;border-style:solid">{{data.fdw}}</td>
                                         <td style="border:1px;border-style:solid">{{data.fdl}}</td>
-                                        <td style="border:1px;border-style:solid">{{data.process}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.processname}}</td>
                                         <td style="border:1px;border-style:solid">{{data.cuttingtype}}</td>
                                         <td style="border:1px;border-style:solid">{{data.noposition}}</td>
                                         <td style="border:1px;border-style:solid">{{data.date_issue}}</td>
@@ -207,7 +207,7 @@ and open the template in the editor.
                                         <td style="border:1px;border-style:solid">{{data.fdt}}</td>
                                         <td style="border:1px;border-style:solid">{{data.fdw}}</td>
                                         <td style="border:1px;border-style:solid">{{data.fdl}}</td>
-                                        <td style="border:1px;border-style:solid">{{data.process}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.processname}}</td>
                                         <td style="border:1px;border-style:solid">{{data.cuttingtype}}</td>
                                         <td style="border:1px;border-style:solid">{{data.noposition}}</td>
                                         <td style="border:1px;border-style:solid">{{data.date_issue}}</td>
