@@ -39,7 +39,7 @@ and open the template in the editor.
 
             <div v-if='jobfintype == "unfinished"'>
                 List of Unfinished Jobs :<br>
-                <select name ="unfinJob" id="unfinJob" v-model="unfinJob" size="10" @change='getUnFinJobListDetails();getUnFinJobOutput()'>
+                <select name ="unfinJob" id="unfinJob" v-model="unfinJob" size="10" @change='getUnFinJobListDetails();getUnFinJobOutput();'>
                     <option v-for="data in unfinJobList" v-bind:value="data.sid">{{data.sid}} | {{data.quono}}</option>
                 </select>
                 Selected : {{unfinJob}}
@@ -247,6 +247,11 @@ and open the template in the editor.
                 </div>
 
             </div>
+            <br>
+            <br>
+            <div>
+                <label style='background-color:green;color:white'>Report : {{finJobInfo}} </label>  
+            </div>
         </div>
         <script>
 var schOutVue = new Vue({
@@ -260,6 +265,7 @@ var schOutVue = new Vue({
         jobfintype: '',
         unfinJob: '',
         finJob: '',
+        finJobInfo: '',
 
         //lists variable
         periodList: '',
@@ -341,6 +347,8 @@ var schOutVue = new Vue({
                 console.log('on getUnFinJobOutput( period=' + period + ' & sid=' + sid + ' Function...');
                 console.log(response.data);
                 schOutVue.unfinJobListOutput = response.data;
+            }).then(function(){
+                schOutVue.getFinJobInfoText();
             });
         },
         getFinJobOutput: function () {
@@ -354,10 +362,89 @@ var schOutVue = new Vue({
                 console.log('on getFinJobOutput( period=' + period + ' & sid=' + sid + ' Function...');
                 console.log(response.data);
                 schOutVue.finJobListOutput = response.data;
+            }).then(function(){
+                schOutVue.getFinJobInfoText();
             });
+        },
+        getFinJobInfoText: function () {
+            let status = this.status;
+            let fintype = this.jobfintype;
+            let finJobListOutput = this.finJobListOutput;
+            let unfinJobListOutput = this.unfinJobListOutput;
+            let finJobInfo = '';
+            console.log('ingetFinJobInfoText function...');
+            switch (status) {
+                case 'active':
+                    console.log('Job is Active');
+                    switch (fintype) {
+                        case 'finished':
+                            console.log('Job is finished');
+                            if (finJobListOutput != 'empty') {
+                                console.log('joblist Output is not empty');
+                                console.log('finJobListOutput = ');
+                                console.log(finJobListOutput);
+                                let finJobTake = finJobListOutput.filter(d => d.jobtype === 'jobtake');
+                                if (finJobTake.length != 0) {
+                                    console.log('Jobtake Exist');
+                                    if (finJobListOutput.length > 1) {
+                                        console.log('There\'s otherJob other thanjobtake ');
+                                        finJobInfo = 'Joblist has been ended properly';
+                                    } else {
+                                        console.log('there\'s only jobtake');
+                                        finJobInfo = 'Joblist has been ended, Without scanned in production!!!';
+                                    }
+                                } else {
+                                    console.log('there\'s no jobtake');
+                                    finJobInfo = 'Joblist has been ended, Without started by Admin!!!';
+                                }
+                            } else {
+                                console.log('Joblist output is empty');
+                                finJobInfo = 'Joblist has been ended, Without started by Admin and without scanned in production!!!';
+                            }
+
+                            break;
+                        case 'unfinished':
+                            console.log('Job is unfinihsed');
+                            if (unfinJobListOutput != 'empty') {
+                                console.log('JoblistOutput is not empty');
+                                console.log('unfinJobListOutput = ');
+                                console.log(unfinJobListOutput);
+                                let unfinJobTake = unfinJobListOutput.filter(d => d.jobtype === 'jobtake');
+                                if (unfinJobTake.length != 0) {
+                                    console.log('There\s jobtake');
+                                    if (unfinJobListOutput.length > 1) {
+                                        console.log('There\'s more than jobtake');
+                                        finJobInfo = 'Joblist is in process';
+                                    } else {
+                                        console.log('There\'s only jobtake');
+                                        finJobInfo = 'Joblist just printed by Admin.';
+                                    }
+                                } else {
+                                    console.log('There\'s no jobtake');
+                                    finJobInfo = 'Joblist is in process, without started by Admin!!!';
+                                }
+                            } else {
+                                console.log('Joblist Output is empty');
+                                finJobInfo = 'Joblist not yet begun process';
+                            }
+                            break;
+                    }
+                    break;
+                case 'billing':
+                    console.log('Status is billing');
+                    finJobInfo = 'Joblist is for Billing Only';
+                    break;
+                case 'cancelled':
+                    console.log('Status is cancelled');
+                    finJobInfo = 'Joblist is cancelled';
+                    break;
+            }
+            schOutVue.finJobInfo = finJobInfo;
+
         }
     },
     computed: {
+
     },
     mounted: function () {
         this.getPeriod();
