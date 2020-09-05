@@ -31,73 +31,213 @@ and open the template in the editor.
 
             <div v-if='jobfintype == "unfinished"'>
                 List of Unfinished Jobs :<br>
-                <select name ="unfinJob" id="unfinJob" v-model="unfinJob" size="10" @change='getUnFinJobDetail()'>
+                <select name ="unfinJob" id="unfinJob" v-model="unfinJob" size="10" @change='getUnFinJobListDetails();getUnFinJobOutput()'>
                     <option v-for="data in unfinJobList" v-bind:value="data.sid">{{data.sid}} | {{data.quono}}</option>
                 </select>
                 Selected : {{unfinJob}}
                 <br>
-                Details :
-                <div v-if="unfinJobListDetail == 'empty' && unfinJob != ''">
-                    Cannot find details, is job has been started?
+                <div>
+                    Scheduling Details :<br>
+                    <div v-if="unfinJobListDetail == '' && unfinJob != ''">
+                        Cannot find details, does job actually exists?
+                    </div>
+                    <div v-if='unfinJobListDetail != "" && unfinJob != ""'>
+                        <div>
+                            <table style="text-align: center;padding: 0px 3px 0px 3px;border:1px;border-style:solid">
+                                <thead style="border:1px;border-style:solid">
+                                    <tr style="border:1px;border-style:solid">
+                                        <th style="border:1px;border-style:solid" rowspan="2">SID</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">BID</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">QID</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">Quono</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">CID</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">Quantity</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">Grade</th>
+                                        <th style="border:1px;border-style:solid" colspan="7">Dimensions</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">Process</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">Cutting Type</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">No. Position</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">Issue Date</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">JL For</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">Status</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">Date of Completion</th>
+                                    </tr>
+                                    <tr>
+                                        <th style="border:1px;border-style:solid">MDT</th>
+                                        <th style="border:1px;border-style:solid">MDW</th>
+                                        <th style="border:1px;border-style:solid">MDL</th>
+                                        <th style="border:1px;border-style:solid"></th>
+                                        <th style="border:1px;border-style:solid">FDT</th>
+                                        <th style="border:1px;border-style:solid">FDW</th>
+                                        <th style="border:1px;border-style:solid">FDL</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for='data in unfinJobListDetail'>                                
+                                        <td style="border:1px;border-style:solid">{{data.sid}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.bid}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.qid}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.quono}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.cid}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.quantity}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.grade}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.mdt}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.mdw}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.mdl}}</td>
+                                        <td style="border:1px;border-style:solid"></td>
+                                        <td style="border:1px;border-style:solid">{{data.fdt}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.fdw}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.fdl}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.process}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.cuttingtype}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.noposition}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.date_issue}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.jlfor}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.status}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.dateofcompletion}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-                <div v-if='unfinJobListDetail !="empty" && unfinJob != ""'>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>POID</th>
-                                <th>SID</th>
-                                <th>Job Type</th>
-                                <th>Start Date</th>
-                                <th>Start By</th>
-                                <th>Machine</th>
-                                <th>End Date</th>
-                                <th>End By</th>
-                                <th>Quantity</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for='data in unfinJobListDetail'>
-                                <td v-for='rows in data'>{{rows}}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <br>
+                <br>
+                <div>
+                    Output Log :
+                    <div v-if="unfinJobListOutput == 'empty' && unfinJob != ''">
+                        Cannot find log, is job has been started?
+                    </div>
+                    <div v-if='unfinJobListOutput !="empty" && unfinJob != ""'>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="border:1px;border-style:solid">POID</th>
+                                    <th style="border:1px;border-style:solid">SID</th>
+                                    <th style="border:1px;border-style:solid">Job Type</th>
+                                    <th style="border:1px;border-style:solid">Start Date</th>
+                                    <th style="border:1px;border-style:solid">Start By</th>
+                                    <th style="border:1px;border-style:solid">Machine</th>
+                                    <th style="border:1px;border-style:solid">End Date</th>
+                                    <th style="border:1px;border-style:solid">End By</th>
+                                    <th style="border:1px;border-style:solid">Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for='data in unfinJobListOutput'>
+                                    <td style="border:1px;border-style:solid" v-for='rows in data'>{{rows}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
 
+                    </div>
                 </div>
             </div>           
 
             <div v-if='jobfintype == "finished"'>
                 List of finished Jobs :<br>
-                <select name ="finJob" id="finJob" v-model="finJob" size="10" @change='getFinJobDetail()'>
+                <select name ="finJob" id="finJob" v-model="finJob" size="10" @change='getFinJobListDetails();getFinJobOutput()'>
                     <option v-for="data in finJobList" v-bind:value="data.sid">{{data.sid}} | {{data.quono}}</option>
                 </select>
                 Selected : {{finJob}}
                 <br>
-                Details :
-                <div v-if="finJobListDetail == 'empty' && finJob != ''">
-                    Cannot find details, is job has been started?
+                <div>
+                    Scheduling Details :<br>
+                    <div v-if="finJobListDetail == '' && finJob != ''">
+                        Cannot find details, does job actually exists?
+                    </div>
+                    <div v-if='finJobListDetail != "" && finJob != ""'>
+                        <div>
+                            <table style="text-align: center;padding: 0px 3px 0px 3px;border:1px;border-style:solid">
+                                <thead style="border:1px;border-style:solid">
+                                    <tr style="border:1px;border-style:solid">
+                                        <th style="border:1px;border-style:solid" rowspan="2">SID</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">BID</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">QID</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">Quono</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">CID</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">Quantity</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">Grade</th>
+                                        <th style="border:1px;border-style:solid" colspan="7">Dimensions</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">Process</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">Cutting Type</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">No. Position</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">Issue Date</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">JL For</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">Status</th>
+                                        <th style="border:1px;border-style:solid" rowspan="2">Date of Completion</th>
+                                    </tr>
+                                    <tr>
+                                        <th style="border:1px;border-style:solid">MDT</th>
+                                        <th style="border:1px;border-style:solid">MDW</th>
+                                        <th style="border:1px;border-style:solid">MDL</th>
+                                        <th style="border:1px;border-style:solid"></th>
+                                        <th style="border:1px;border-style:solid">FDT</th>
+                                        <th style="border:1px;border-style:solid">FDW</th>
+                                        <th style="border:1px;border-style:solid">FDL</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for='data in finJobListDetail'>                                
+                                        <td style="border:1px;border-style:solid">{{data.sid}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.bid}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.qid}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.quono}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.cid}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.quantity}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.grade}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.mdt}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.mdw}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.mdl}}</td>
+                                        <td style="border:1px;border-style:solid"></td>
+                                        <td style="border:1px;border-style:solid">{{data.fdt}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.fdw}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.fdl}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.process}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.cuttingtype}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.noposition}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.date_issue}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.jlfor}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.status}}</td>
+                                        <td style="border:1px;border-style:solid">{{data.dateofcompletion}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-                <div v-if='finJobListDetail != "empty" && finJob != ""'>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>POID</th>
-                                <th>SID</th>
-                                <th>Job Type</th>
-                                <th>Start Date</th>
-                                <th>Start By</th>
-                                <th>Machine</th>
-                                <th>End Date</th>
-                                <th>End By</th>
-                                <th>Quantity</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for='data in finJobListDetail'>
-                                <td v-for='rows in data'>{{rows}}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <br>
+                <br>
+                <div>
+                    Output Log :
+                    <div v-if="finJobListOutput == 'empty' && finJob != ''">
+                        Cannot find log, is job has been started?
+                    </div>
+                    <div v-if='finJobListOutput !="empty" && finJob != ""'>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="border:1px;border-style:solid">POID</th>
+                                    <th style="border:1px;border-style:solid">SID</th>
+                                    <th style="border:1px;border-style:solid">Job Type</th>
+                                    <th style="border:1px;border-style:solid">Start Date</th>
+                                    <th style="border:1px;border-style:solid">Start By</th>
+                                    <th style="border:1px;border-style:solid">Machine</th>
+                                    <th style="border:1px;border-style:solid">End Date</th>
+                                    <th style="border:1px;border-style:solid">End By</th>
+                                    <th style="border:1px;border-style:solid">Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for='data in finJobListOutput'>
+                                    <td style="border:1px;border-style:solid" v-for='rows in data'>{{rows}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
                 </div>
+
             </div>
         </div>
         <script>
@@ -117,7 +257,9 @@ var schOutVue = new Vue({
         unfinJobList: '',
         finJobList: '',
         unfinJobListDetail: '',
-        finJobListDetail: ''
+        finJobListDetail: '',
+        unfinJobListOutput: '',
+        finJobListOutput: ''
     },
     watch: {
     },
@@ -157,32 +299,52 @@ var schOutVue = new Vue({
                 schOutVue.finJobList = response.data;
             });
         },
-        getUnFinJobDetail: function () {
+        getFinJobListDetails: function () {
+            let period = this.period;
+            let sid = this.finJob;
+            let finjoblist = this.finJobList;
+            let finJobListDetail = finjoblist.filter(d => d.sid === sid);
+            console.log('filtered finJobList...');
+            console.log(finJobListDetail);
+            schOutVue.finJobListDetail = finJobListDetail;
+        },
+        getUnFinJobListDetails: function () {
+            let period = this.period;
+            let sid = this.unfinJob;
+            let unfinjoblist = this.unfinJobList;
+            let unfinJobListDetail = unfinjoblist.filter(d => d.sid === sid);
+            console.log('filtered unfinJobList...');
+            console.log(unfinJobListDetail);
+            schOutVue.unfinJobListDetail = unfinJobListDetail;
+        },
+        getUnFinJobOutput: function () {
             let period = this.period;
             let sid = this.unfinJob;
             axios.post(this.phpajaxresponsefile, {
-                action: 'getUnFinJobDetail',
+                action: 'getUnFinJobOutput',
                 period: period,
                 sid: sid
             }).then(function (response) {
-                console.log('on getUnFinJobDetail( period=' + period + ' & sid=' + sid + ' Function...');
+                console.log('on getUnFinJobOutput( period=' + period + ' & sid=' + sid + ' Function...');
                 console.log(response.data);
-                schOutVue.unfinJobListDetail = response.data;
+                schOutVue.unfinJobListOutput = response.data;
             });
         },
-        getFinJobDetail: function () {
+        getFinJobOutput: function () {
             let period = this.period;
             let sid = this.finJob;
             axios.post(this.phpajaxresponsefile, {
-                action: 'getFinJobDetail',
+                action: 'getFinJobOutput',
                 period: period,
                 sid: sid
             }).then(function (response) {
-                console.log('on getFinJobDetail( period=' + period + ' & sid=' + sid + ' Function...');
+                console.log('on getFinJobOutput( period=' + period + ' & sid=' + sid + ' Function...');
                 console.log(response.data);
-                schOutVue.finJobListDetail = response.data;
+                schOutVue.finJobListOutput = response.data;
             });
         }
+    },
+    computed: {
     },
     mounted: function () {
         this.getPeriod();

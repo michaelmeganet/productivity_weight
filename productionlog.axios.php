@@ -71,14 +71,14 @@ switch ($action) {
         $finData = $objSQL->getResultRowArray();
         echo json_encode($finData);
         break;
-    case 'getUnFinJobDetail':
+    case 'getUnFinJobOutput':
         $period = $received_data->period;
         $sid = $received_data->sid;
         $detailData = get_job_detail($period, $sid);
         
         echo json_encode($detailData);
         break;
-    case 'getFinJobDetail':
+    case 'getFinJobOutput':
         $period = $received_data->period;
         $sid = $received_data->sid;
         $detailData = get_job_detail($period, $sid);
