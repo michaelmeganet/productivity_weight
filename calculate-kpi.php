@@ -170,6 +170,7 @@ foreach($namelist as $array) {
         echo "\$count = $count , \$recordCount = $recordCount <br>";
         if($count == $recordCount){
             if($index_per_shift > 0.00){
+            $KPI_Raw = number_format($index_gain/$index_per_shift * 1, 2);
             $KPI_weekday  = number_format($index_gain/$index_per_shift * 9.8, 2);
             $KPI_holiday = number_format($index_gain/$index_per_shift * 7.35, 2);
             }else{
@@ -179,7 +180,9 @@ foreach($namelist as $array) {
 
             echo "The total index gain in KG for $value is $index_gain <br>";
             echo "The index per shift of $model, $machineModel is $index_per_shift <br> ";
+            echo "The raw KPI is $KPI_Raw  <br>";
             echo "The weekday KPI is $KPI_weekday <br>";
+            echo "The Holiday KPI is $KPI_holiday <br>";
             $index_gain = 0;
         }
 
