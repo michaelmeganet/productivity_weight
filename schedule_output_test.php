@@ -145,6 +145,27 @@ and open the template in the editor.
                         </table>
 
                     </div>
+                    <br>
+                    <div v-if='unfinJobListDetail != ""' v-for="det in unfinJobListDetail">
+                        <label>Cutting Type : {{det.cuttingtype}}</label><br>
+                        <label>Process Code : {{det.processname}}</label>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Job Work Detail :</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <template v-for="rowArr in JobWorkDetail">
+                                <tr v-for="(val,index) in rowArr">
+                                    <td>{{index}}</td>
+                                    <td>:</td>
+                                    <td>{{val}}</td>
+                                </tr>
+                            </template>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>           
 
@@ -248,7 +269,28 @@ and open the template in the editor.
                                 </tr>
                             </tbody>
                         </table>
-
+                        
+                    </div>
+                    <br>
+                    <div v-if='finJobListDetail != ""' v-for="det in finJobListDetail">
+                        <label>Cutting Type : {{det.cuttingtype}}</label><br>
+                        <label>Process Code : {{det.processname}}</label>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Job Work Detail :</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <template v-for="rowArr in JobWorkDetail">
+                                <tr v-for="(val,index) in rowArr">
+                                    <td>{{index}}</td>
+                                    <td>:</td>
+                                    <td>{{val}}</td>
+                                </tr>
+                            </template>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -281,7 +323,8 @@ var schOutVue = new Vue({
         unfinJobListDetail: '',
         finJobListDetail: '',
         unfinJobListOutput: '',
-        finJobListOutput: ''
+        finJobListOutput: '',
+        JobWorkDetail: ''
     },
     watch: {
     },
@@ -293,6 +336,17 @@ var schOutVue = new Vue({
                 console.log('onGetPeriod Function....');
                 console.log(response.data);
                 schOutVue.periodList = response.data;
+            });
+        },
+        getJobWorkDetail: function (jobListDetail, jobListOutput) {
+            axios.post(this.phpajaxresponsefile, {
+                action: 'getJobWorkDetail',
+                jobListDetail: jobListDetail,
+                jobListOutput: jobListOutput
+            }).then(function (response) {
+                console.log('on getJobWorkDetail function....');
+                console.log(response.data);
+                schOutVue.JobWorkDetail = response.data;
             });
         },
         getAllJobList: function () {
@@ -358,8 +412,9 @@ var schOutVue = new Vue({
                 console.log('on getUnFinJobOutput( period=' + period + ' & sid=' + sid + ' Function...');
                 console.log(response.data);
                 schOutVue.unfinJobListOutput = response.data;
-            }).then(function(){
+            }).then(function () {
                 schOutVue.getFinJobInfoText();
+                schOutVue.getJobWorkDetail(schOutVue.unfinJobListDetail, schOutVue.unfinJobListOutput);
             });
         },
         getFinJobOutput: function () {
@@ -373,8 +428,9 @@ var schOutVue = new Vue({
                 console.log('on getFinJobOutput( period=' + period + ' & sid=' + sid + ' Function...');
                 console.log(response.data);
                 schOutVue.finJobListOutput = response.data;
-            }).then(function(){
+            }).then(function () {
                 schOutVue.getFinJobInfoText();
+                schOutVue.getJobWorkDetail(schOutVue.finJobListDetail, schOutVue.finJobListOutput);
             });
         },
         getFinJobInfoText: function () {
