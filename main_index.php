@@ -25,8 +25,6 @@
         <?php
 
         function callSqlInsert($insertArray, $table) {
-
-
             $cnt = 0;
             foreach ($insertArray as $key => $value) {
                 $cnt++;
@@ -60,6 +58,44 @@
             echo "\$sqlInsert = $sqlInsert <br>";
             $objInsert = new SQLBINDPARAM($sqlInsert, $insertArray);
             $result = $objInsert->InsertData2();
+            echo "$result <br>";
+            return $result;
+        }
+        
+        function callSqlUpdate($updateArray, $table, $wid) {
+            $cnt = 0;
+            foreach ($updateArray as $key => $value) {
+                $cnt++;
+                ${$key} = $value;
+                echo "$cnt)  $key : $value\n" . "<br>";
+//                    debug_to_console("$key => $value");
+            }
+            // $arrayKeys = array_keys($insertArray);    //--> fetches the keys of array
+            ##$lastArrayKey = array_pop($insertArray); //--> fetches the last key of the compiled keys of array
+            end($updateArray); // move the internal pointer to the end of the array
+            $lastArrayKey = key($updateArray);  // fetches the key of the element pointed to by the internal pointer
+            $sqlUpdate = "UPDATE $table SET ";
+            #begin loop
+            foreach ($updateArray as $key => $value) {
+
+                ${$key} = trim($value);
+                $columnHeader = $key; // creates new variable based on $key values
+                echo $columnHeader . " = " . $$columnHeader . "<br>";
+
+                /* $dbg->review($columnHeader." = ".$$columnHeader."<br>"); */ //this is for debugging, not yet implemented
+
+                $sqlUpdate .= $columnHeader . "=:{$columnHeader}";     //--> adds the key as parameter
+                if ($columnHeader != $lastArrayKey) {
+                    $sqlUpdate .= ", ";      //--> if not final key, writes comma to separate between indexes
+                } else {
+                    #do nothing         //--> if yes, do nothing
+                }
+            }
+            # end loop
+            $sqlUpdate .= " WHERE wid = $wid";
+            echo "\$sqlUpdate = $sqlUpdate <br>";
+            $objInsert = new SQLBINDPARAM($sqlUpdate, $updateArray);
+            $result = $objInsert->UpdateData2();
             echo "$result <br>";
             return $result;
         }
@@ -148,11 +184,6 @@
                     $cuttingtype = $datarow['cuttingtype'];
                     $quantity = $datarow['quantity'];
 
-                    //Begin check for qid, quono, and cid
-                    $proweight_data = search_output_data($table, $sid, $qid, $quono, $cid); //--> this checks if the data already exists or not,
-                    if ($proweight_data != 'not exists') {
-                        throw new Exception('Data already inputted');
-                    }
                     //end check
                     // if(isset($weight)){
                     //     $weight = floatval($weight) ;
@@ -167,32 +198,6 @@
                     //     $weight = 0;
                     //     $total_weight = 0;
                     // }
-
-                    if ($fdt == 0 && $materialcode != 'hk2p') { // If no finishing, then finishing is same as raw
-                        $fdt = $datarow['mdt'];
-                    }
-                    if ($fdw == 0 && $materialcode != 'hk2p') { // If no finishing, then finishing is same as raw
-                        $fdw = $datarow['mdw'];
-                    }
-                    if ($fdl == 0 && $materialcode != 'hk2p') { // If no finishing, then finishing is same as raw
-                        $fdl = $datarow['mdl'];
-                    }
-                    $dimension_array_legacy = array('mdt' => $fdt, 'mdw' => $fdw, 'mdl' => $fdl, 'quantity' => $quantity);
-                    echo "<br>";
-                    print_r($dimension_array_legacy);
-                    echo "<br>";
-                    if ($materialcode != 'hk2p') {
-
-                        echo "\$cid = $cid, \$com = $com , \$materialcode = $materialcode <br>";
-                        $obj = new MATERIAL_SPECIAL_PRICE_CID($cid, $com, $materialcode, $dimension_array_legacy);
-                        $weight = $obj->getWeight();
-                    } else {
-                        $weight = (float) 0.00;
-                    }
-                    $weight = floatval($weight);
-                    $total_weight = floatval($weight) * floatval($quantity);
-                    echo "<b>quono - $quono </b> , grade = $grade ,   $dimension <br>";
-                    echo "<b> Weight = $weight , Totalweight = $total_weight</b><br>";
                     //Get Start_By Staff ID
                     $qr2 = "SELECT * FROM $tbloutput WHERE sid = $sid AND NOT jobtype = 'jobtake' ORDER BY poid";
                     $objSQL2 = new SQL($qr2);
@@ -245,7 +250,7 @@
 
                     if (isset($mcid)) {
                         //Get Machine Data
-                        $qr4 = "SELECT * FROM machine WHERE mcid = $mcid";
+                        $qr4 = "SELECT * FROM machine2020 WHERE mcid = $mcid";
                         $objSQL4 = new SQL($qr4);
                         $results4 = $objSQL4->getResultOneRowArray();
                         $machineid = $results4['machineid'];
@@ -259,6 +264,39 @@
                         $model = null;
                         $index_per_shift = null;
                     }
+
+                    //Begin check for qid, quono, and cid
+                    $proweight_data = search_output_data($table, $sid, $qid, $quono, $cid); //--> this checks if the data already exists or not,
+                    if ($proweight_data != 'not exists') {
+                        throw new Exception('Data already inputted');
+                    }
+
+                    if ($fdt == 0 && $materialcode != 'hk2p') { // If no finishing, then finishing is same as raw
+                        $fdt = $datarow['mdt'];
+                    }
+                    if ($fdw == 0 && $materialcode != 'hk2p') { // If no finishing, then finishing is same as raw
+                        $fdw = $datarow['mdw'];
+                    }
+                    if ($fdl == 0 && $materialcode != 'hk2p') { // If no finishing, then finishing is same as raw
+                        $fdl = $datarow['mdl'];
+                    }
+                    $dimension_array_legacy = array('mdt' => $fdt, 'mdw' => $fdw, 'mdl' => $fdl, 'quantity' => $quantity);
+                    echo "<br>";
+                    print_r($dimension_array_legacy);
+                    echo "<br>";
+                    if ($materialcode != 'hk2p') {
+
+                        echo "\$cid = $cid, \$com = $com , \$materialcode = $materialcode <br>";
+                        $obj = new MATERIAL_SPECIAL_PRICE_CID($cid, $com, $materialcode, $dimension_array_legacy);
+                        $weight = $obj->getWeight();
+                    } else {
+                        $weight = (float) 0.00;
+                    }
+                    $weight = floatval($weight);
+                    $total_weight = floatval($weight) * floatval($quantity);
+                    echo "<b>quono - $quono </b> , grade = $grade ,   $dimension <br>";
+                    echo "<b> Weight = $weight , Totalweight = $total_weight</b><br>";
+
                     // echo "machineModel - $machineModel<br>";
                     //idv  Day   Date   Staff id   Staff name   MachineModel   Cutting Type   start_datetime   end_datetime   net_dattime   work_hour   qty   Weight(kg)
                     // $arr_mainLog[] = array(
@@ -331,8 +369,68 @@
                     $insertResult = callSqlInsert($insertArray, $table);
                     echo "The insert result is " . $insertResult . "<br>";
                     echo "#####################################################################################<br>";
+                    unset($dateofcompletion);
+                    unset($status);
+                    unset($date_start);
+                    unset($staffname);
+                    unset($machineModel);
+                    unset($model);
+                    unset($packing);
+                    unset($index_per_shift);
                 } catch (Exception $ex) {
-                    echo "Item : sid = $sid; qid = $qid; quono = $quono; cid = $cid<br>" . $ex->getMessage() . "<br><br>";
+                    echo "Item : sid = $sid; qid = $qid; quono = $quono; cid = $cid<br>" .
+                    $ex->getMessage() . "<br>";
+                    echo "Start Check if data updated or not :===<br><br>\n";
+                    echo "proweight_data = ";
+                    print_r($proweight_data);
+                    echo "<br><br>\n";
+                    $wid = $proweight_data['wid'];
+                    $updateArray = array();
+                    if (trim($dateofcompletion != trim($proweight_data['dateofcompletion']))) {
+                        $updateArray['dateofcompletion'] = $dateofcompletion;
+                        unset($dateofcompletion);
+                    }
+                    if (trim($status) != trim($proweight_data['status'])) {
+                        $updateArray['status'] = $status;
+                        unset($status);
+                    }
+                    if (isset($date_start)) {
+                        if (trim(date_format(date_create($date_start), 'Y-m-d')) != trim($proweight_data['date_start'])) {
+                            $updateArray['date_start'] = date_format(date_create($date_start), 'Y-m-d');
+                            unset($date_start);
+                        }
+                    }
+                    if (trim($staffname) != trim($proweight_data['staffname'])) {
+                        $updateArray['staffname'] = $staffname;
+                        unset($staffname);
+                    }
+                    if (trim($machineModel) != trim($proweight_data['machineModel'])) {
+                        $updateArray['machineModel'] = $machineModel;
+                        unset($machineModel);
+                    }
+                    if (trim($model) != trim($proweight_data['model'])) {
+                        $updateArray['model'] = $model;
+                        unset($model);
+                    }
+                    if (trim($packing) != trim($proweight_data['packing'])) {
+                        $updateArray['packing'] = $packing;
+                        unset($packing);
+                    }
+                    if (trim($index_per_shift) != trim($proweight_data['index_per_shift'])) {
+                        $updateArray['index_per_shift'] = $index_per_shift;
+                        unset($index_per_shift);
+                    }
+
+                    if (!empty($updateArray)) {
+                        echo "List of data needs update :<br>\n";
+                        print_r($updateArray);
+                        echo "<br>\n";
+                        $updateResult = callSqlUpdate($updateArray, $table, $wid);
+                        echo "Update result : $updateResult<br>\n";
+                    } else {
+                        echo "Data no need to update . <br>\n";
+                    }
+                    echo "<br>";
                 }
             }
         } catch (Exception $e) {
