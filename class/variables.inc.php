@@ -292,7 +292,7 @@ Class SQLBINDPARAM extends SQL {
             ${$key} = $value;
             $bindValue = $key;
             $bindParamdata = "bindParam(:{$bindValue}, $$bindValue) == " . $$bindValue; //this is for debugging purposes
-            debug_to_console($bindParamdata);
+            #debug_to_console($bindParamdata);
             #echo "\$bindParamdata = $bindParamdata <br>";
             #########################################################
             # this line not successful, how to check in the future
