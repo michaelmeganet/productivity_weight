@@ -20,8 +20,11 @@ and open the template in the editor.
                 <select id="period" name='period' v-model='period'>
                     <option v-for='data in periodList' bind:value='data'>{{data}}</option>
                 </select>
-                <input type='submit' value='Show Table' v-show='period != ""' />
+                <input type='submit' value='generate table (production_weight_period)' v-show='period != ""' />
+
             </form>
+            <p>Select period to generate data in production_weight_period table</p>
+            <p>Truncate production_weight_period table  <span><a href='./truncate-production_weight.php' target='_blank'>click here</a></span></p>
             </div>
             <?php
             if (isset($_POST['period'])){
@@ -40,6 +43,10 @@ and open the template in the editor.
         <div>
         <a href="./calculate-kpi.php">get kpi page</a>     
        </div>
+       <div>
+       <a href="./schedule_output_test.php">check Scheduling output page</a>
+       </div>
+ 
         <script>
             var logVue = new Vue({
                 el: '#mainLog',
