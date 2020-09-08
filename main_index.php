@@ -183,7 +183,7 @@
 
                     $cuttingtype = $datarow['cuttingtype'];
                     $quantity = $datarow['quantity'];
-                    $jobcode = $jlfor." ".substr($quono,0,3)." ".substr($date_issue,2,2).substr($date_issue,5,2)." ".sprintf('%04d',$runningno)." ".sprintf('%02d',$jobno)." ".substr($completion_date,2,2).substr($completion_date,5,2);
+                    $jobcode = $jlfor." ".substr($quono,0,3)." ".substr($date_issue,2,2).substr($date_issue,5,2)." ".sprintf('%04d',$runningno)." ".sprintf('%02d',$jobno)." ".substr($completion_date,2,2);
                     echo "jobcode = $jobcode<br>\n";
                     //end check
                     // if(isset($weight)){
