@@ -46,7 +46,7 @@ and open the template in the editor.
             <div v-if='jobfintype == "unfinished"'>
                 List of Unfinished Jobs :<br>
                 <select name ="unfinJob" id="unfinJob" v-model="unfinJob" size="10" @change='getUnFinJobListDetails();getUnFinJobOutput();'>
-                    <option v-for="data in unfinJobList" v-bind:value="data.sid">{{data.sid}} | {{data.quono}}</option>
+                    <option v-for="data in unfinJobList" v-bind:value="data.sid">{{data.sid}} || {{data.jobcode}}</option>
                 </select>
                 Selected : {{unfinJob}}
                 <br>
@@ -172,7 +172,7 @@ and open the template in the editor.
             <div v-if='jobfintype == "finished"'>
                 List of finished Jobs :<br>
                 <select name ="finJob" id="finJob" v-model="finJob" size="10" @change='getFinJobListDetails();getFinJobOutput()'>
-                    <option v-for="data in finJobList" v-bind:value="data.sid">{{data.sid}} | {{data.quono}}</option>
+                    <option v-for="data in finJobList" v-bind:value="data.sid">{{data.sid}} || {{data.jobcode}}</option>
                 </select>
                 Selected : {{finJob}}
                 <br>
@@ -327,6 +327,16 @@ var schOutVue = new Vue({
         JobWorkDetail: ''
     },
     watch: {
+    },
+    filters : {
+      subStr: function(string,startpos,endpos){
+          return string.substring(startpos,endpos);
+      },
+      padStr: function(string,padNum){
+          var s = string+"";
+          while (string.length < padNum) s = "0" + s;
+          return s;
+      }
     },
     methods: {
         getPeriod: function () {
