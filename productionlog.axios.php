@@ -281,7 +281,11 @@ class JOB_WORK_DETAIL {
             if (!empty($result)) {
                 #echo "onsearch---\n";
                 #print_r($result);
-                return $result[0];
+                foreach($result as $data_row){
+                    return $data_row;
+                    break;
+                }
+                #return $result[];
             } else {
                 return 'empty';
             }
