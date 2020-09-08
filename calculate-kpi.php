@@ -99,7 +99,7 @@ foreach($namelist as $array) {
         ?>
         <table style="width: 100%;">
         <tr>
-            <th>qid</th><th>quono</th><th>Grade</th><th>Quantity</th><th>Unit weight</th><th>Total Weight</th><th>Dimensions</th><th>jlfor</th><th>Index Gain in KG</th>
+            <th>qid</th><th>Job Code</th><th>Grade</th><th>Quantity</th><th>Unit weight</th><th>Total Weight</th><th>Dimensions</th><th>jlfor</th><th>Index Gain in KG</th>
             <th>jobno</th><th>date of completion</th><th>cid</th><th>Cutting type</th><th>Staff Name</th><th>Machine Model</th>
             <th>Start Date</th><th>Model</th>
         </tr> 
@@ -117,6 +117,7 @@ foreach($namelist as $array) {
                 #echo "<br></pre><br>";
                 $qid = $datarow['qid'];
                 $quono=$datarow['quono'];
+                $jobcode = $datarow['jobcode'];
                 $grade=$datarow['grade'];
                 $quantity = $datarow['quantity'];
                 $unit_weight = $datarow['unit_weight'];
@@ -143,7 +144,7 @@ foreach($namelist as $array) {
                 
             echo 
             "<tr>
-                <td>$qid</td><td>$quono</td><td>$grade</td><td>$quantity</td><td>$unit_weight</td><td>$total_weight</td><td>$dimension</td><td>$jlfor</td><td>$index_gain_in_kg</td>
+                <td>$qid</td><td>$jobcode</td><td>$grade</td><td>$quantity</td><td>$unit_weight</td><td>$total_weight</td><td>$dimension</td><td>$jlfor</td><td>$index_gain_in_kg</td>
                 <td>$jobno</td><td>$dateofcompletion</td><td>$cid</td><td>$cuttingtype</td><td>$staffname</td><td>$machineModel</td>
                 <td>$startdate</td><td>$model</td>
             
