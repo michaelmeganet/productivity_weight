@@ -91,6 +91,16 @@ switch ($action) {
         #echo $qr;
         $objSQL = new SQL($qr);
         $unfinData = $objSQL->getResultRowArray();
+        foreach($unfinData as $data_key => $data_row){
+            $cus_code = substr($data_row['quono'],0,3);
+            $jobno = sprintf('%02d',$data_row['jobno']);
+            $runningno = sprintf('%04d',$data_row['runningno']);
+            $branch = $data_row['jlfor'];
+            $date_start = substr($data_row['date_issue'],2,2).substr($data_row['date_issue'],5,2);
+            $date_complete = substr($data_row['completion_date'],2,2).substr($data_row['completion_date'],5,2);
+            $jobcode = $branch.' '.$cus_code.' '.$date_start.' '.$runningno.' '.$jobno.' '.$date_complete;
+            $unfinData[$data_key]['jobcode'] = $jobcode;
+        }
         echo json_encode($unfinData);
         break;
     case 'getFinJobList':
@@ -111,6 +121,16 @@ switch ($action) {
         #echo $qr;
         $objSQL = new SQL($qr);
         $finData = $objSQL->getResultRowArray();
+        foreach($finData as $data_key => $data_row){
+            $cus_code = substr($data_row['quono'],0,3);
+            $jobno = sprintf('%02d',$data_row['jobno']);
+            $runningno = sprintf('%04d',$data_row['runningno']);
+            $branch = $data_row['jlfor'];
+            $date_start = substr($data_row['date_issue'],2,2).substr($data_row['date_issue'],5,2);
+            $date_complete = substr($data_row['completion_date'],2,2).substr($data_row['completion_date'],5,2);
+            $jobcode = $branch.' '.$cus_code.' '.$date_start.' '.$runningno.' '.$jobno.' '.$date_complete;
+            $finData[$data_key]['jobcode'] = $jobcode;
+        }
         #print_r($finData);
         echo json_encode($finData);
         break;
