@@ -67,12 +67,11 @@
         function search_output_data($outputTbl, $sid, $qid, $quono, $cid) {
             $qr = "SELECT * FROM $outputTbl WHERE sid = $sid AND qid = $qid AND quono = '$quono' AND cid = $cid";
             $objSQL = new SQL($qr);
-            
+
             $results = $objSQL->getResultOneRowArray();
-            If (!empty($results)){
-                $info = 'exists';
-                throw new Exception('Data already inputted');
-            }else{
+            If (!empty($results)) {
+                return $results;
+            } else {
                 $info = 'not exists';
             }
             return $info;
@@ -95,8 +94,8 @@
         $arr_mainLog = array();
         $count = 0;
         $table = "production_weight_" . $period;
-        
-        $outputDataList = "SELECT * FROM $table"; 
+
+        $outputDataList = "SELECT * FROM $table";
         ?>
 
 <!-- <table style="width: 100%;">
@@ -115,13 +114,13 @@
                 #print_r($datarow);
                 #echo "<br></pre><br>";
                 try {
-                    
+
                     $qid = $datarow['qid']; //--> check if this exists or not
                     $quono = $datarow['quono']; //--> check if this exists or not
                     $cid = $datarow['cid']; //--> check if this exists or not
                     $sid = $datarow['sid'];
-                    
-                    
+
+
                     $jlfor = $datarow['jlfor'];
                     $dateofcompletion = $datarow['dateofcompletion'];
                     $runningno = $datarow['runningno'];
@@ -148,11 +147,13 @@
 
                     $cuttingtype = $datarow['cuttingtype'];
                     $quantity = $datarow['quantity'];
-                    
+
                     //Begin check for qid, quono, and cid
-                    search_output_data($table, $sid, $qid, $quono, $cid); //--> this checks if the data already exists or not,
+                    $proweight_data = search_output_data($table, $sid, $qid, $quono, $cid); //--> this checks if the data already exists or not,
+                    if ($proweight_data != 'not exists') {
+                        throw new Exception('Data already inputted');
+                    }
                     //end check
-                    
                     // if(isset($weight)){
                     //     $weight = floatval($weight) ;
                     //     if(floatval($weight) > 0.00){
@@ -202,6 +203,7 @@
                         $date_start = $results2['date_start'];
                         $enddate = $results2['date_end'];
                         $mcid = $results2['machine_id'];
+                        echo"mcid = $mcid\n";
                         $day = date_format(date_create($date_start), 'l');
                         $date = date_format(date_create($date_start), 'd-m-Y');
                         $netdatetime = strtotime($enddate) - strtotime($date_start);
@@ -330,7 +332,7 @@
                     echo "The insert result is " . $insertResult . "<br>";
                     echo "#####################################################################################<br>";
                 } catch (Exception $ex) {
-                    echo "Item : sid = $sid; qid = $qid; quono = $quono; cid = $cid<br>".$ex->getMessage()."<br><br>"; 
+                    echo "Item : sid = $sid; qid = $qid; quono = $quono; cid = $cid<br>" . $ex->getMessage() . "<br><br>";
                 }
             }
         } catch (Exception $e) {
