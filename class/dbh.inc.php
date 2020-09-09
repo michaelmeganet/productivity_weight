@@ -9,8 +9,8 @@ class Dbh {
     private $charset;
 
     public function connect() {
-        $this->servername = "localhost";
-//                $this->servername = "10.10.1.2";
+//        $this->servername = "localhost";
+                $this->servername = "10.10.1.2";
         $this->username = "root";
         $this->password = "5105458";
         $this->dbname = "phhsystem";

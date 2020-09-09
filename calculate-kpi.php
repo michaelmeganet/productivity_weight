@@ -134,7 +134,7 @@ foreach($namelist as $array) {
                 //echo "sid = $sid<br>";
                 $startdate = $datarow['date_start'];
                 $model = $datarow['model'];
-                $index_gain_in_kg = $total_weight * $quantity;
+                $index_gain_in_kg = $unit_weight * $quantity;
                 $index_per_shift = $datarow['index_per_shift'];
                 if(isset($index_gain_in_kg)){
                     $index_gain_in_kg = floatval($index_gain_in_kg);

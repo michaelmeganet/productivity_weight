@@ -113,6 +113,9 @@ and open the template in the editor.
                                 </tbody>
                             </table>
                         </div>
+                        <div>
+                            <label>Total Weight : </label>
+                        </div>
                     </div>
                 </div>
                 <br>
@@ -269,7 +272,7 @@ and open the template in the editor.
                                 </tr>
                             </tbody>
                         </table>
-                        
+
                     </div>
                     <br>
                     <div v-if='finJobListDetail != ""' v-for="det in finJobListDetail">
@@ -328,15 +331,16 @@ var schOutVue = new Vue({
     },
     watch: {
     },
-    filters : {
-      subStr: function(string,startpos,endpos){
-          return string.substring(startpos,endpos);
-      },
-      padStr: function(string,padNum){
-          var s = string+"";
-          while (string.length < padNum) s = "0" + s;
-          return s;
-      }
+    filters: {
+        subStr: function (string, startpos, endpos) {
+            return string.substring(startpos, endpos);
+        },
+        padStr: function (string, padNum) {
+            var s = string + "";
+            while (string.length < padNum)
+                s = "0" + s;
+            return s;
+        }
     },
     methods: {
         getPeriod: function () {
@@ -403,13 +407,20 @@ var schOutVue = new Vue({
             schOutVue.finJobListDetail = finJobListDetail;
         },
         getUnFinJobListDetails: function () {
-            let period = this.period;
-            let sid = this.unfinJob;
-            let unfinjoblist = this.unfinJobList;
-            let unfinJobListDetail = unfinjoblist.filter(d => d.sid === sid);
+            let period = schOutVue.period;
+            let sid = schOutVue.unfinJob;
+            let unfinjoblist = schOutVue.unfinJobList;
+            let unfinJobListDetail = unfinjoblist.filter(d => d.sid === sid); //this is filtered data based on selected jobno
             console.log('filtered unfinJobList...');
             console.log(unfinJobListDetail);
             schOutVue.unfinJobListDetail = unfinJobListDetail;
+            axios.post(this.phpajaxresponsefile, {
+                action: 'getWeightDetails',
+                jobListDetail: unfinJobListDetail                
+            }).then(function(response){
+                console.log('in getWeightDetails....');
+                console.log(response.data);
+            });
         },
         getUnFinJobOutput: function () {
             let period = this.period;
