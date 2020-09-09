@@ -88,7 +88,7 @@ foreach($namelist as $array) {
         $objcount = new SQL($sqlCount);
         $recordCount = $objcount->getRowCount();
         echo "record(s) counted of $value in $kpidata is/are ".$recordCount ."<br>";
-        $qr = "SELECT * FROM $kpidata WHERE staffname = '$value' ";
+        $qr = "SELECT * FROM $kpidata WHERE staffname = '$value' ORDER BY sid, date_start ASC	";
 
         //echo "\$qr = $qr <br>";
         $objSQL = new SQL($qr);
