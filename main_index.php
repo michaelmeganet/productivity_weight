@@ -176,7 +176,6 @@
                     $fdt = $datarow['fdt'];
                     $fdl = $datarow['fdl'];
                     $fdw = $datarow['fdw'];
-                    $dimension = "$fdt x $fdw x $fdl";
                     $com = strtolower(trim($datarow['company']));
                     $materialcode = $datarow['grade'];
                     echo "\$materialcode = $materialcode <br>";
@@ -272,15 +271,17 @@
                         throw new Exception('Data already inputted');
                     }
 
-                    if ($fdt == 0 && $materialcode != 'hk2p') { // If no finishing, then finishing is same as raw
+                    if (($fdt == 0 || $fdt == '' || $fdt == null) && $materialcode != 'hk2p') { // If no finishing, then finishing is same as raw
                         $fdt = $datarow['mdt'];
                     }
-                    if ($fdw == 0 && $materialcode != 'hk2p') { // If no finishing, then finishing is same as raw
+                    if (($fdw == 0 || $fdw == '' || $fdw == null) && $materialcode != 'hk2p') { // If no finishing, then finishing is same as raw
                         $fdw = $datarow['mdw'];
                     }
-                    if ($fdl == 0 && $materialcode != 'hk2p') { // If no finishing, then finishing is same as raw
+                    if (($fdl == 0 || $fdl == '' || $fdl == null) && $materialcode != 'hk2p') { // If no finishing, then finishing is same as raw
                         $fdl = $datarow['mdl'];
                     }
+                    
+                    $dimension = "$fdt x $fdw x $fdl";
                     $dimension_array_legacy = array('mdt' => $fdt, 'mdw' => $fdw, 'mdl' => $fdl, 'quantity' => $quantity);
                     echo "<br>";
                     print_r($dimension_array_legacy);
