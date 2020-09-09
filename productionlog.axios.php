@@ -30,7 +30,7 @@ function get_adminstaff_name($staffid) {
     }
 }
 
-function get_job_output($period, $sid) {
+function get_job_output($period, $sid, $weight) {
     $proouttab = "production_output_" . $period;
     $machinetab = "machine2020";
     $qr = "SELECT $proouttab.*, $machinetab.name as `machine_name`, $machinetab.model, $machinetab.index_per_hour "
@@ -45,6 +45,28 @@ function get_job_output($period, $sid) {
         $end_by = get_adminstaff_name($val['end_by']);
         $results[$key]['start_by'] = $start_by;
         $results[$key]['end_by'] = $end_by;
+        $dayofweek = date_format(date_create($val['date_start']), 'l');
+        $results[$key]['dayofweek'] = $dayofweek;
+        $hour_start = date_format(date_create($val['date_start']), 'H');
+        $minute_start = date_format(date_create($val['date_start']), 'i');
+        $second_start = date_format(date_create($val['date_start']), 's');
+        if ((($hour_start >= 17 && $minute_start > 0 && $second_start > 0) || ($dayofweek == ('Saturday' || 'Sunday'))) && $val['jobtype'] != 'jobtake') {
+            //overtime
+            $results[$key]['workshift'] = 'overtime';
+            if ($val['index_per_hour'] > 0) {
+                $results[$key]['kpi_index'] = round(floatval($weight) / (floatval($val['index_per_hour'])*8) * 9.8,8);
+            } else {
+                $results[$key['kpi_index']] = 'no value';
+            }
+        } else {
+            //normal hour
+            $results[$key]['workshift'] = 'normal';
+            if ($val['index_per_hour'] > 0) {
+                $results[$key]['kpi_index'] = round(floatval($weight) / (floatval($val['index_per_hour'])*8) * 7.35,8);
+            } else {
+                $results[$key]['kpi_index'] = 'no value';
+            }
+        }
     }
     #echo $qr;
     if (!empty($results)) {
@@ -175,25 +197,27 @@ switch ($action) {
             } else {
                 $weight = (float) 0.00;
             }
-            $weight = round(floatval($weight),2);
-            $total_weight = round(floatval($weight) * floatval($quantity),2);
+            $weight = round(floatval($weight), 2);
+            $total_weight = round(floatval($weight) * floatval($quantity), 2);
             #echo "grade = $grade ,   $dimension <br>";
             #echo "<b> Weight = $weight , Totalweight = $total_weight</b><br>";
-            $arr_weight =['weight' => $weight, 'total_weight' => $total_weight];
+            $arr_weight = ['weight' => $weight, 'total_weight' => $total_weight];
             echo json_encode($arr_weight);
         }
         break;
     case 'getUnFinJobOutput':
         $period = $received_data->period;
         $sid = $received_data->sid;
-        $detailData = get_job_output($period, $sid);
+        $weight = $received_data->weight;
+        $detailData = get_job_output($period, $sid, $weight);
 
         echo json_encode($detailData);
         break;
     case 'getFinJobOutput':
         $period = $received_data->period;
         $sid = $received_data->sid;
-        $detailData = get_job_output($period, $sid);
+        $weight = $received_data->weight;
+        $detailData = get_job_output($period, $sid, $weight);
 
         echo json_encode($detailData);
         break;

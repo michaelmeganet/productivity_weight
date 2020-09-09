@@ -45,7 +45,7 @@ and open the template in the editor.
 
             <div v-if='jobfintype == "unfinished"'>
                 List of Unfinished Jobs :<br>
-                <select name ="unfinJob" id="unfinJob" v-model="unfinJob" size="10" @change='getUnFinJobListDetails();getUnFinJobOutput();'>
+                <select name ="unfinJob" id="unfinJob" v-model="unfinJob" size="10" @change='getUnFinJobListDetails()'>
                     <option v-for="data in unfinJobList" v-bind:value="data.sid">{{data.sid}} || {{data.jobcode}}</option>
                 </select>
                 Selected : {{unfinJob}}
@@ -140,6 +140,12 @@ and open the template in the editor.
                                     <th style="border:1px;border-style:solid">End Date</th>
                                     <th style="border:1px;border-style:solid">End By</th>
                                     <th style="border:1px;border-style:solid">Quantity</th>
+                                    <th style="border:1px;border-style:solid">Machine Name</th>
+                                    <th style="border:1px;border-style:solid">Model</th>
+                                    <th style="border:1px;border-style:solid">Index per Hour</th>
+                                    <th style="border:1px;border-style:solid">Work Day</th>
+                                    <th style="border:1px;border-style:solid">Work Shift</th>
+                                    <th style="border:1px;border-style:solid">Index KPI</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -176,17 +182,17 @@ and open the template in the editor.
 
             <div v-if='jobfintype == "finished"'>
                 List of finished Jobs :<br>
-                <select name ="finJob" id="finJob" v-model="finJob" size="10" @change='getFinJobListDetails();getFinJobOutput()'>
+                <select name ="finJob" id="finJob" v-model="finJob" size="10" @change='getFinJobListDetails()'>
                     <option v-for="data in finJobList" v-bind:value="data.sid">{{data.sid}} || {{data.jobcode}}</option>
                 </select>
                 Selected : {{finJob}}
                 <br>
                 <div>
                     Scheduling Details :<br>
-                    <div v-if="finJobListDetail == '' && finJob != '' && finJobListLoading == 'false'">
+                    <div v-if="finJobListDetail == '' && finJob != ''">
                         Cannot find details, does job actually exists?
                     </div>
-                    <div v-if='finJobListDetail != "" && finJob != "" && finJobListLoading == "false"'>
+                    <div v-if='finJobListDetail != "" && finJob != ""'>
                         <div>
                             <table style="text-align: center;padding: 0px 3px 0px 3px;border:1px;border-style:solid">
                                 <thead style="border:1px;border-style:solid">
@@ -245,18 +251,20 @@ and open the template in the editor.
                             </table>
                         </div>
                     </div>
-                    <div v-if="finJobListLoading = 'true'">
-                        <label>Loading data....</label>
+                    <br>
+                    <div>
+                        <label>Unit  Weight : {{thisWeight}} </label><br>
+                        <label>Total Weight : {{thisTotalWeight}} </label>
                     </div>
                 </div>
                 <br>
                 <br>
                 <div>
                     Output Log :
-                    <div v-if="finJobListOutput == 'empty' && finJob != '' && finJobOutputLoading == 'false'">
+                    <div v-if="finJobListOutput == 'empty' && finJob != ''">
                         Cannot find log, is job has been started?
                     </div>
-                    <div v-if='finJobListOutput !="empty" && finJob != "" && finJobOutputLoading == "false"'>
+                    <div v-if='finJobListOutput !="empty" && finJob != ""'>
                         <table>
                             <thead>
                                 <tr>
@@ -272,7 +280,10 @@ and open the template in the editor.
                                     <th style="border:1px;border-style:solid">Machine Name</th>
                                     <th style="border:1px;border-style:solid">Model</th>
                                     <th style="border:1px;border-style:solid">Index per Hour</th>
-                                    
+                                    <th style="border:1px;border-style:solid">Work Day</th>
+                                    <th style="border:1px;border-style:solid">Work Shift</th>
+                                    <th style="border:1px;border-style:solid">Index KPI</th>
+
                             </thead>
                             <tbody>
                                 <tr v-for='data in finJobListOutput'>
@@ -281,9 +292,6 @@ and open the template in the editor.
                             </tbody>
                         </table>
 
-                    </div>
-                    <div v-if="finJobOutputLoading == 'false'">
-                        Data is loading...
                     </div>
                     <br>
                     <div v-if='finJobListDetail != ""' v-for="det in finJobListDetail">
@@ -340,12 +348,7 @@ var schOutVue = new Vue({
         finJobListOutput: '',
         JobWorkDetail: '',
         thisWeight: '',
-        thisTotalWeight: '',
-        
-        finJobListLoading:'',
-        finJobOutputLoading:'',
-        unfinJobListLoading:'',
-        unfinJobOutputLoading:''
+        thisTotalWeight: ''
     },
     watch: {
     },
@@ -416,57 +419,59 @@ var schOutVue = new Vue({
             });
         },
         getFinJobListDetails: function () {
-            this.finJobListLoading = 'true';
             let period = this.period;
             let sid = this.finJob;
             let finjoblist = this.finJobList;
             let finJobListDetail = finjoblist.filter(d => d.sid === sid);
-                schOutVue.thisWeight = '';
-                schOutVue.thisTotalWeight = '';
+            schOutVue.thisWeight = '';
+            schOutVue.thisTotalWeight = '';
             console.log('filtered finJobList...');
             console.log(finJobListDetail);
             schOutVue.finJobListDetail = finJobListDetail;
             axios.post(this.phpajaxresponsefile, {
                 action: 'getWeightDetails',
-                jobListDetail: finJobListDetail                
-            }).then(function(response){
+                jobListDetail: finJobListDetail
+            }).then(function (response) {
                 console.log('in getWeightDetails....');
                 console.log(response.data);
                 schOutVue.thisWeight = response.data.weight;
                 schOutVue.thisTotalWeight = response.data.total_weight;
+            }).then(function(){
+                schOutVue.getFinJobOutput();
             });
-            this.finJobListLoading = 'false';
         },
         getUnFinJobListDetails: function () {
-            this.unfinJobListLoading = 'true';
             let period = schOutVue.period;
             let sid = schOutVue.unfinJob;
             let unfinjoblist = schOutVue.unfinJobList;
             let unfinJobListDetail = unfinjoblist.filter(d => d.sid === sid); //this is filtered data based on selected jobno
-                schOutVue.thisWeight = '';
-                schOutVue.thisTotalWeight = '';
+            schOutVue.thisWeight = '';
+            schOutVue.thisTotalWeight = '';
             console.log('filtered unfinJobList...');
             console.log(unfinJobListDetail);
             schOutVue.unfinJobListDetail = unfinJobListDetail;
             axios.post(this.phpajaxresponsefile, {
                 action: 'getWeightDetails',
-                jobListDetail: unfinJobListDetail                
-            }).then(function(response){
+                jobListDetail: unfinJobListDetail
+            }).then(function (response) {
                 console.log('in getWeightDetails....');
                 console.log(response.data);
                 schOutVue.thisWeight = response.data.weight;
                 schOutVue.thisTotalWeight = response.data.total_weight;
+            }).then(function(){
+                schOutVue.getUnFinJobOutput();
+                
             });
-            this.unfinJobListLoading = 'false';
         },
         getUnFinJobOutput: function () {
-            this.unfinJobOutputLoading = 'true';
             let period = this.period;
             let sid = this.unfinJob;
+            let weight = this.thisTotalWeight;
             axios.post(this.phpajaxresponsefile, {
                 action: 'getUnFinJobOutput',
                 period: period,
-                sid: sid
+                sid: sid,
+                weight: weight
             }).then(function (response) {
                 console.log('on getUnFinJobOutput( period=' + period + ' & sid=' + sid + ' Function...');
                 console.log(response.data);
@@ -475,16 +480,16 @@ var schOutVue = new Vue({
                 schOutVue.getFinJobInfoText();
                 schOutVue.getJobWorkDetail(schOutVue.unfinJobListDetail, schOutVue.unfinJobListOutput);
             });
-            this.unfinJobOutputLoading = 'false';
         },
         getFinJobOutput: function () {
-            this.finJobOutputLoading = 'true';
             let period = this.period;
             let sid = this.finJob;
+            let weight = this.thisTotalWeight;
             axios.post(this.phpajaxresponsefile, {
                 action: 'getFinJobOutput',
                 period: period,
-                sid: sid
+                sid: sid,
+                weight: weight
             }).then(function (response) {
                 console.log('on getFinJobOutput( period=' + period + ' & sid=' + sid + ' Function...');
                 console.log(response.data);
@@ -493,7 +498,6 @@ var schOutVue = new Vue({
                 schOutVue.getFinJobInfoText();
                 schOutVue.getJobWorkDetail(schOutVue.finJobListDetail, schOutVue.finJobListOutput);
             });
-            this.finJobOutputLoading = 'false';
         },
         getFinJobInfoText: function () {
             let status = this.status;
