@@ -32,7 +32,12 @@ function get_adminstaff_name($staffid) {
 
 function get_job_output($period, $sid) {
     $proouttab = "production_output_" . $period;
-    $qr = "SELECT * FROM $proouttab WHERE sid = $sid";
+    $machinetab = "machine2020";
+    $qr = "SELECT $proouttab.*, $machinetab.name as `machine_name`, $machinetab.model, $machinetab.index_per_hour "
+            . "FROM $proouttab "
+            . "INNER JOIN $machinetab "
+            . "ON $machinetab.mcid = $proouttab.machine_id WHERE sid = $sid";
+    #echo $qr.'\n';
     $objSQL = new SQL($qr);
     $results = $objSQL->getResultRowArray();
     foreach ($results as $key => $val) {
@@ -170,8 +175,8 @@ switch ($action) {
             } else {
                 $weight = (float) 0.00;
             }
-            $weight = floatval($weight);
-            $total_weight = floatval($weight) * floatval($quantity);
+            $weight = round(floatval($weight),2);
+            $total_weight = round(floatval($weight) * floatval($quantity),2);
             #echo "grade = $grade ,   $dimension <br>";
             #echo "<b> Weight = $weight , Totalweight = $total_weight</b><br>";
             $arr_weight =['weight' => $weight, 'total_weight' => $total_weight];
