@@ -45,7 +45,7 @@ and open the template in the editor.
 
             <div v-if='jobfintype == "unfinished"'>
                 List of Unfinished Jobs :<br>
-                <select name ="unfinJob" id="unfinJob" v-model="unfinJob" size="10" @change='getUnFinJobListDetails();getUnFinJobOutput();'>
+                <select name ="unfinJob" id="unfinJob" v-model="unfinJob" size="10" @change='getUnFinJobListDetails()'>
                     <option v-for="data in unfinJobList" v-bind:value="data.sid">{{data.sid}} || {{data.jobcode}}</option>
                 </select>
                 Selected : {{unfinJob}}
@@ -113,6 +113,11 @@ and open the template in the editor.
                                 </tbody>
                             </table>
                         </div>
+                        <br>
+                        <div>
+                            <label>Unit  Weight : {{thisWeight}} </label><br>
+                            <label>Total Weight : {{thisTotalWeight}} </label>
+                        </div>
                     </div>
                 </div>
                 <br>
@@ -135,6 +140,12 @@ and open the template in the editor.
                                     <th style="border:1px;border-style:solid">End Date</th>
                                     <th style="border:1px;border-style:solid">End By</th>
                                     <th style="border:1px;border-style:solid">Quantity</th>
+                                    <th style="border:1px;border-style:solid">Machine Name</th>
+                                    <th style="border:1px;border-style:solid">Model</th>
+                                    <th style="border:1px;border-style:solid">Index per Hour</th>
+                                    <th style="border:1px;border-style:solid">Work Day</th>
+                                    <th style="border:1px;border-style:solid">Work Shift</th>
+                                    <th style="border:1px;border-style:solid">Index KPI</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -171,7 +182,7 @@ and open the template in the editor.
 
             <div v-if='jobfintype == "finished"'>
                 List of finished Jobs :<br>
-                <select name ="finJob" id="finJob" v-model="finJob" size="10" @change='getFinJobListDetails();getFinJobOutput()'>
+                <select name ="finJob" id="finJob" v-model="finJob" size="10" @change='getFinJobListDetails()'>
                     <option v-for="data in finJobList" v-bind:value="data.sid">{{data.sid}} || {{data.jobcode}}</option>
                 </select>
                 Selected : {{finJob}}
@@ -240,6 +251,11 @@ and open the template in the editor.
                             </table>
                         </div>
                     </div>
+                    <br>
+                    <div>
+                        <label>Unit  Weight : {{thisWeight}} </label><br>
+                        <label>Total Weight : {{thisTotalWeight}} </label>
+                    </div>
                 </div>
                 <br>
                 <br>
@@ -261,7 +277,13 @@ and open the template in the editor.
                                     <th style="border:1px;border-style:solid">End Date</th>
                                     <th style="border:1px;border-style:solid">End By</th>
                                     <th style="border:1px;border-style:solid">Quantity</th>
-                                </tr>
+                                    <th style="border:1px;border-style:solid">Machine Name</th>
+                                    <th style="border:1px;border-style:solid">Model</th>
+                                    <th style="border:1px;border-style:solid">Index per Hour</th>
+                                    <th style="border:1px;border-style:solid">Work Day</th>
+                                    <th style="border:1px;border-style:solid">Work Shift</th>
+                                    <th style="border:1px;border-style:solid">Index KPI</th>
+
                             </thead>
                             <tbody>
                                 <tr v-for='data in finJobListOutput'>
@@ -269,7 +291,7 @@ and open the template in the editor.
                                 </tr>
                             </tbody>
                         </table>
-                        
+
                     </div>
                     <br>
                     <div v-if='finJobListDetail != ""' v-for="det in finJobListDetail">
@@ -324,19 +346,22 @@ var schOutVue = new Vue({
         finJobListDetail: '',
         unfinJobListOutput: '',
         finJobListOutput: '',
-        JobWorkDetail: ''
+        JobWorkDetail: '',
+        thisWeight: '',
+        thisTotalWeight: ''
     },
     watch: {
     },
-    filters : {
-      subStr: function(string,startpos,endpos){
-          return string.substring(startpos,endpos);
-      },
-      padStr: function(string,padNum){
-          var s = string+"";
-          while (string.length < padNum) s = "0" + s;
-          return s;
-      }
+    filters: {
+        subStr: function (string, startpos, endpos) {
+            return string.substring(startpos, endpos);
+        },
+        padStr: function (string, padNum) {
+            var s = string + "";
+            while (string.length < padNum)
+                s = "0" + s;
+            return s;
+        }
     },
     methods: {
         getPeriod: function () {
@@ -398,26 +423,55 @@ var schOutVue = new Vue({
             let sid = this.finJob;
             let finjoblist = this.finJobList;
             let finJobListDetail = finjoblist.filter(d => d.sid === sid);
+            schOutVue.thisWeight = '';
+            schOutVue.thisTotalWeight = '';
             console.log('filtered finJobList...');
             console.log(finJobListDetail);
             schOutVue.finJobListDetail = finJobListDetail;
+            axios.post(this.phpajaxresponsefile, {
+                action: 'getWeightDetails',
+                jobListDetail: finJobListDetail
+            }).then(function (response) {
+                console.log('in getWeightDetails....');
+                console.log(response.data);
+                schOutVue.thisWeight = response.data.weight;
+                schOutVue.thisTotalWeight = response.data.total_weight;
+            }).then(function(){
+                schOutVue.getFinJobOutput();
+            });
         },
         getUnFinJobListDetails: function () {
-            let period = this.period;
-            let sid = this.unfinJob;
-            let unfinjoblist = this.unfinJobList;
-            let unfinJobListDetail = unfinjoblist.filter(d => d.sid === sid);
+            let period = schOutVue.period;
+            let sid = schOutVue.unfinJob;
+            let unfinjoblist = schOutVue.unfinJobList;
+            let unfinJobListDetail = unfinjoblist.filter(d => d.sid === sid); //this is filtered data based on selected jobno
+            schOutVue.thisWeight = '';
+            schOutVue.thisTotalWeight = '';
             console.log('filtered unfinJobList...');
             console.log(unfinJobListDetail);
             schOutVue.unfinJobListDetail = unfinJobListDetail;
+            axios.post(this.phpajaxresponsefile, {
+                action: 'getWeightDetails',
+                jobListDetail: unfinJobListDetail
+            }).then(function (response) {
+                console.log('in getWeightDetails....');
+                console.log(response.data);
+                schOutVue.thisWeight = response.data.weight;
+                schOutVue.thisTotalWeight = response.data.total_weight;
+            }).then(function(){
+                schOutVue.getUnFinJobOutput();
+                
+            });
         },
         getUnFinJobOutput: function () {
             let period = this.period;
             let sid = this.unfinJob;
+            let weight = this.thisTotalWeight;
             axios.post(this.phpajaxresponsefile, {
                 action: 'getUnFinJobOutput',
                 period: period,
-                sid: sid
+                sid: sid,
+                weight: weight
             }).then(function (response) {
                 console.log('on getUnFinJobOutput( period=' + period + ' & sid=' + sid + ' Function...');
                 console.log(response.data);
@@ -430,10 +484,12 @@ var schOutVue = new Vue({
         getFinJobOutput: function () {
             let period = this.period;
             let sid = this.finJob;
+            let weight = this.thisTotalWeight;
             axios.post(this.phpajaxresponsefile, {
                 action: 'getFinJobOutput',
                 period: period,
-                sid: sid
+                sid: sid,
+                weight: weight
             }).then(function (response) {
                 console.log('on getFinJobOutput( period=' + period + ' & sid=' + sid + ' Function...');
                 console.log(response.data);

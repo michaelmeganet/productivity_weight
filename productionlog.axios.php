@@ -30,9 +30,14 @@ function get_adminstaff_name($staffid) {
     }
 }
 
-function get_job_output($period, $sid) {
+function get_job_output($period, $sid, $weight) {
     $proouttab = "production_output_" . $period;
-    $qr = "SELECT * FROM $proouttab WHERE sid = $sid";
+    $machinetab = "machine2020";
+    $qr = "SELECT $proouttab.*, $machinetab.name as `machine_name`, $machinetab.model, $machinetab.index_per_hour "
+            . "FROM $proouttab "
+            . "INNER JOIN $machinetab "
+            . "ON $machinetab.mcid = $proouttab.machine_id WHERE sid = $sid";
+    #echo $qr.'\n';
     $objSQL = new SQL($qr);
     $results = $objSQL->getResultRowArray();
     foreach ($results as $key => $val) {
@@ -40,6 +45,28 @@ function get_job_output($period, $sid) {
         $end_by = get_adminstaff_name($val['end_by']);
         $results[$key]['start_by'] = $start_by;
         $results[$key]['end_by'] = $end_by;
+        $dayofweek = date_format(date_create($val['date_start']), 'l');
+        $results[$key]['dayofweek'] = $dayofweek;
+        $hour_start = date_format(date_create($val['date_start']), 'H');
+        $minute_start = date_format(date_create($val['date_start']), 'i');
+        $second_start = date_format(date_create($val['date_start']), 's');
+        if ((($hour_start >= 17 && $minute_start > 0 && $second_start > 0) || ($dayofweek == ('Saturday' || 'Sunday'))) && $val['jobtype'] != 'jobtake') {
+            //overtime
+            $results[$key]['workshift'] = 'overtime';
+            if ($val['index_per_hour'] > 0) {
+                $results[$key]['kpi_index'] = round(floatval($weight) / (floatval($val['index_per_hour'])*8) * 9.8,8);
+            } else {
+                $results[$key['kpi_index']] = 'no value';
+            }
+        } else {
+            //normal hour
+            $results[$key]['workshift'] = 'normal';
+            if ($val['index_per_hour'] > 0) {
+                $results[$key]['kpi_index'] = round(floatval($weight) / (floatval($val['index_per_hour'])*8) * 7.35,8);
+            } else {
+                $results[$key]['kpi_index'] = 'no value';
+            }
+        }
     }
     #echo $qr;
     if (!empty($results)) {
@@ -91,14 +118,14 @@ switch ($action) {
         #echo $qr;
         $objSQL = new SQL($qr);
         $unfinData = $objSQL->getResultRowArray();
-        foreach($unfinData as $data_key => $data_row){
-            $cus_code = substr($data_row['quono'],0,3);
-            $jobno = sprintf('%02d',$data_row['jobno']);
-            $runningno = sprintf('%04d',$data_row['runningno']);
+        foreach ($unfinData as $data_key => $data_row) {
+            $cus_code = substr($data_row['quono'], 0, 3);
+            $jobno = sprintf('%02d', $data_row['jobno']);
+            $runningno = sprintf('%04d', $data_row['runningno']);
             $branch = $data_row['jlfor'];
-            $date_start = substr($data_row['date_issue'],2,2).substr($data_row['date_issue'],5,2);
-            $date_complete = substr($data_row['completion_date'],2,2).substr($data_row['completion_date'],5,2);
-            $jobcode = $branch.' '.$cus_code.' '.$date_start.' '.$runningno.' '.$jobno.' '.$date_complete;
+            $date_start = substr($data_row['date_issue'], 2, 2) . substr($data_row['date_issue'], 5, 2);
+            $date_complete = substr($data_row['completion_date'], 2, 2) . substr($data_row['completion_date'], 5, 2);
+            $jobcode = $branch . ' ' . $cus_code . ' ' . $date_start . ' ' . $runningno . ' ' . $jobno . ' ' . $date_complete;
             $unfinData[$data_key]['jobcode'] = $jobcode;
         }
         echo json_encode($unfinData);
@@ -121,30 +148,76 @@ switch ($action) {
         #echo $qr;
         $objSQL = new SQL($qr);
         $finData = $objSQL->getResultRowArray();
-        foreach($finData as $data_key => $data_row){
-            $cus_code = substr($data_row['quono'],0,3);
-            $jobno = sprintf('%02d',$data_row['jobno']);
-            $runningno = sprintf('%04d',$data_row['runningno']);
+        foreach ($finData as $data_key => $data_row) {
+            $cus_code = substr($data_row['quono'], 0, 3);
+            $jobno = sprintf('%02d', $data_row['jobno']);
+            $runningno = sprintf('%04d', $data_row['runningno']);
             $branch = $data_row['jlfor'];
-            $date_start = substr($data_row['date_issue'],2,2).substr($data_row['date_issue'],5,2);
-            $date_complete = substr($data_row['completion_date'],2,2).substr($data_row['completion_date'],5,2);
-            $jobcode = $branch.' '.$cus_code.' '.$date_start.' '.$runningno.' '.$jobno.' '.$date_complete;
+            $date_start = substr($data_row['date_issue'], 2, 2) . substr($data_row['date_issue'], 5, 2);
+            #$date_complete = substr($data_row['completion_date'],2,2).substr($data_row['completion_date'],5,2);
+            $jobcode = $branch . ' ' . $cus_code . ' ' . $date_start . ' ' . $runningno . ' ' . $jobno; #.' '.$date_complete;
             $finData[$data_key]['jobcode'] = $jobcode;
         }
         #print_r($finData);
         echo json_encode($finData);
         break;
+    case 'getWeightDetails':
+        $arr_jobListDetails = json_decode(json_encode($received_data->jobListDetail), true);
+        foreach ($arr_jobListDetails as $data_key => $data_row) {
+
+            //begin try calc weight value
+            $fdt = $data_row['fdt'];
+            $fdw = $data_row['fdw'];
+            $fdl = $data_row['fdl'];
+            $mdt = $data_row['mdt'];
+            $mdw = $data_row['mdw'];
+            $mdl = $data_row['mdl'];
+            $quantity = $data_row['quantity'];
+            $materialcode = $data_row['grade'];
+            $cid = $data_row['cid'];
+            $com = $data_row['company'];
+
+            if ($fdt == 0 && $materialcode != 'hk2p') { // If no finishing, then finishing is same as raw
+                $fdt = $data_row['mdt'];
+            }
+            if ($fdw == 0 && $materialcode != 'hk2p') { // If no finishing, then finishing is same as raw
+                $fdw = $data_row['mdw'];
+            }
+            if ($fdl == 0 && $materialcode != 'hk2p') { // If no finishing, then finishing is same as raw
+                $fdl = $data_row['mdl'];
+            }
+            $dimension_array_legacy = array('mdt' => $fdt, 'mdw' => $fdw, 'mdl' => $fdl, 'quantity' => $quantity);
+            #echo "<br>";
+            #print_r($dimension_array_legacy);
+            #echo "<br>";
+            if ($materialcode != 'hk2p') {
+                #echo "\$cid = $cid, \$com = $com , \$materialcode = $materialcode <br>";
+                $obj = new MATERIAL_SPECIAL_PRICE_CID($cid, $com, $materialcode, $dimension_array_legacy);
+                $weight = $obj->getWeight();
+            } else {
+                $weight = (float) 0.00;
+            }
+            $weight = round(floatval($weight), 2);
+            $total_weight = round(floatval($weight) * floatval($quantity), 2);
+            #echo "grade = $grade ,   $dimension <br>";
+            #echo "<b> Weight = $weight , Totalweight = $total_weight</b><br>";
+            $arr_weight = ['weight' => $weight, 'total_weight' => $total_weight];
+            echo json_encode($arr_weight);
+        }
+        break;
     case 'getUnFinJobOutput':
         $period = $received_data->period;
         $sid = $received_data->sid;
-        $detailData = get_job_output($period, $sid);
+        $weight = $received_data->weight;
+        $detailData = get_job_output($period, $sid, $weight);
 
         echo json_encode($detailData);
         break;
     case 'getFinJobOutput':
         $period = $received_data->period;
         $sid = $received_data->sid;
-        $detailData = get_job_output($period, $sid);
+        $weight = $received_data->weight;
+        $detailData = get_job_output($period, $sid, $weight);
 
         echo json_encode($detailData);
         break;
@@ -281,7 +354,7 @@ class JOB_WORK_DETAIL {
             if (!empty($result)) {
                 #echo "onsearch---\n";
                 #print_r($result);
-                foreach($result as $data_row){
+                foreach ($result as $data_row) {
                     return $data_row;
                     break;
                 }
@@ -325,9 +398,9 @@ class JOB_WORK_DETAIL {
         $qr = "SELECT process FROM premachining WHERE pmid = $processcode";
         $objSQL = new SQL($qr);
         $result = $objSQL->getResultOneRowArray();
-        if (!empty($result)){
+        if (!empty($result)) {
             $processname = $result['process'];
-        }else{
+        } else {
             $processname = 'none';
         }
         $gotRG = stripos($processname, 'RG');
