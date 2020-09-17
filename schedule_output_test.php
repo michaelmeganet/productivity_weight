@@ -45,10 +45,10 @@ and open the template in the editor.
 
             <div v-if='jobfintype == "unfinished"'>
                 List of Unfinished Jobs :<br>
-                <select name ="unfinJob" id="unfinJob" v-model="unfinJob" size="10" @change='getUnFinJobListDetails()'>
+                <select name ="unfinJob" id="unfinJob" v-model="unfinJob" size="10" @change='getUnFinJobListDetails();showUnFinSelected();'>
                     <option v-for="data in unfinJobList" v-bind:value="data.sid">{{data.sid}} || {{data.jobcode}}</option>
                 </select>
-                Selected : {{unfinJob}}
+                Selected : <template v-for='data in unfinjobno'>{{data.sid}} || {{data.jobcode}}</template>
                 <br>
                 <div>
                     Scheduling Details :<br>
@@ -182,10 +182,10 @@ and open the template in the editor.
 
             <div v-if='jobfintype == "finished"'>
                 List of finished Jobs :<br>
-                <select name ="finJob" id="finJob" v-model="finJob" size="10" @change='getFinJobListDetails()'>
+                <select name ="finJob" id="finJob" v-model="finJob" size="10" @change='getFinJobListDetails();showFinSelected();'>
                     <option v-for="data in finJobList" v-bind:value="data.sid">{{data.sid}} || {{data.jobcode}}</option>
                 </select>
-                Selected : {{finJob}}
+                Selected : <template v-for='data in finjobno'>{{data.sid}} || {{data.jobcode}}</template>
                 <br>
                 <div>
                     Scheduling Details :<br>
@@ -335,7 +335,9 @@ var schOutVue = new Vue({
         status: '',
         jobfintype: '',
         unfinJob: '',
+        unfinjobno:'',
         finJob: '',
+        finjobno: '',
         finJobInfo: '',
 
         //lists variable
@@ -352,6 +354,8 @@ var schOutVue = new Vue({
     },
     watch: {
     },
+    computed: {
+    },
     filters: {
         subStr: function (string, startpos, endpos) {
             return string.substring(startpos, endpos);
@@ -364,6 +368,28 @@ var schOutVue = new Vue({
         }
     },
     methods: {
+        showUnFinSelected: function () {
+            let unfinjob = this.unfinJob;
+            let unfinJobList = this.unfinJobList;
+            if (unfinJobList != '') {
+                let filteredArray = unfinJobList.filter(d => d.sid === unfinjob);
+                console.log('on showUnFinSelected');
+                console.log(filteredArray);
+                unfinjobno = filteredArray;
+                this.unfinjobno = unfinjobno;
+            }
+        },
+        showFinSelected: function () {
+            let finjob = this.finJob;
+            let finJobList = this.finJobList;
+            if (finJobList != '') {
+                let filteredArray = finJobList.filter(d => d.sid === finjob);
+                console.log('on showUnFinSelected');
+                console.log(filteredArray);
+                finjobno = filteredArray;
+                this.finjobno = finjobno;
+            }
+        },
         getPeriod: function () {
             axios.post(this.phpajaxresponsefile, {
                 action: 'getPeriod' // var_dump object(stdClass)#1 (1) {  ["action"]=>   string(9) "getPeriod"
@@ -436,7 +462,7 @@ var schOutVue = new Vue({
                 console.log(response.data);
                 schOutVue.thisWeight = response.data.weight;
                 schOutVue.thisTotalWeight = response.data.total_weight;
-            }).then(function(){
+            }).then(function () {
                 schOutVue.getFinJobOutput();
             });
         },
@@ -458,9 +484,9 @@ var schOutVue = new Vue({
                 console.log(response.data);
                 schOutVue.thisWeight = response.data.weight;
                 schOutVue.thisTotalWeight = response.data.total_weight;
-            }).then(function(){
+            }).then(function () {
                 schOutVue.getUnFinJobOutput();
-                
+
             });
         },
         getUnFinJobOutput: function () {
@@ -575,9 +601,6 @@ var schOutVue = new Vue({
             schOutVue.finJobInfo = finJobInfo;
 
         }
-    },
-    computed: {
-
     },
     mounted: function () {
         this.getPeriod();

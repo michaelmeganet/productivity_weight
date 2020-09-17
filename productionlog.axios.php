@@ -41,8 +41,8 @@ function get_job_output($period, $sid, $weight) {
     $objSQL = new SQL($qr);
     $results = $objSQL->getResultRowArray();
     foreach ($results as $key => $val) {
-        $start_by = get_adminstaff_name($val['start_by']);
-        $end_by = get_adminstaff_name($val['end_by']);
+        $start_by = $val['start_by'] . ' | ' .get_adminstaff_name($val['start_by']);
+        $end_by = $val['end_by'] . ' | ' . get_adminstaff_name($val['end_by']);
         $results[$key]['start_by'] = $start_by;
         $results[$key]['end_by'] = $end_by;
         $dayofweek = date_format(date_create($val['date_start']), 'l');
