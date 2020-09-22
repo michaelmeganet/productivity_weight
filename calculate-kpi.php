@@ -87,20 +87,21 @@
             print_r($array);
             echo "<br>\n";
             foreach ($array as $key => $value) {
-                $sqlMachine = "SELECT DISTINCT machineModel FROM $kpidata WHERE staffname = '$value'";
+                $sqlMachine = "SELECT DISTINCT machineModel,model FROM $kpidata WHERE staffname = '$value'";
                 $objSQLmc = new SQL($sqlMachine);
                 $mcList = $objSQLmc->getResultRowArray();
                 foreach ($mcList as $data_row) {
                     $machine_name = trim($data_row['machineModel']);
-                    echo "Machine Name = $machine_name<br>";
+                    $machine_model = trim($data_row['model']);
+                    echo "Machine Name = $machine_name - $machine_model<br>";
                     $count = 0;
                     ${$key} = $value;
                     //echo "$key : $value\n"."<br>";
-                    $sqlCount = "SELECT count(*) FROM $kpidata WHERE staffname = '$value' AND machineModel LIKE '%$machine_name%'";
+                    $sqlCount = "SELECT count(*) FROM $kpidata WHERE staffname = '$value' AND model LIKE '%$machine_model%'";
                     $objcount = new SQL($sqlCount);
                     $recordCount = $objcount->getRowCount();
                     echo "record(s) counted of $value in $kpidata is/are " . $recordCount . "<br>";
-                    $qr = "SELECT * FROM $kpidata WHERE staffname = '$value' AND machineModel LIKE '%$machine_name%' ORDER BY sid, date_start ASC";
+                    $qr = "SELECT * FROM $kpidata WHERE staffname = '$value' AND machineModel LIKE '%$machine_name%' AND model LIKE '%$machine_model%' ORDER BY sid, date_start ASC";
                     //echo "\$qr = $qr <br>";
                     $objSQL = new SQL($qr);
                     $results = $objSQL->getResultRowArray();
