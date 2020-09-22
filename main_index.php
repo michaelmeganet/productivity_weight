@@ -415,8 +415,8 @@ include_once 'class/phhdate.inc.php';
                             unset($status);
                         }
                         if (isset($date_start)) {
-                            if (trim(date_format(date_create($date_start), 'Y-m-d')) != trim($proweight_data['date_start'])) {
-                                $updateArray['date_start'] = date_format(date_create($date_start), 'Y-m-d');
+                            if (trim(date_format(date_create($date_start), 'Y-m-d H:i:s')) != trim($proweight_data['date_start'])) {
+                                $updateArray['date_start'] = date_format(date_create($date_start), 'Y-m-d H:i:s');
                                 unset($date_start);
                             }
                         }
