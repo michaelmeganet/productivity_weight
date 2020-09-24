@@ -241,6 +241,7 @@
                         $dateofcompletion = $prodWData['dateofcompletion'];
                         $cid = $prodWData['cid'];
                         $cuttingtype = $prodWData['cuttingtype'];
+                        $staffid = $prodWData['staffid'];
                         $staffname = $prodWData['staffname'];
                         $machineModel = $prodWData['machineModel'];
                         $model = $prodWData['model'];
@@ -300,6 +301,7 @@
                             'cid' => $cid,
                             'poid' => $poid,
                             'cuttingtype' => $cuttingtype,
+                            'staffid' => $staffid,
                             'staffname' => $staffname,
                             'machineModel' => $machineModel,
                             'start_time' => $start_time,
@@ -360,6 +362,10 @@
                                     $upd_array['poid'] = $poid;
                                     unset($poid);
                                 }
+                                if ($staffid != $existingData['staffid']) {
+                                    $upd_array['staffid'] = $staffid;
+                                    unset($staffid);
+                                }
                                 if ($staffname != $existingData['staffname']) {
                                     $upd_array['staffname'] = $staffname;
                                     unset($staffname);
@@ -392,7 +398,7 @@
                                     print_r($upd_array);
                                     echo "</pre>";
                                     $updResult = update_KPI_Detail($upd_array, $period, $kpidid);
-                                    if ($updResult == 'update ok!') {
+                                    if ($updResult == 'Update ok!') {
                                         echo "<span style='color:green'>Update successful!</span><br>";
                                         $cntUpd++;
                                     } else {

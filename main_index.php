@@ -360,6 +360,7 @@
                     $insertArray["jlfor"] = $jlfor;
                     $insertArray["poid"] = $poid;
                     $insertArray["status"] = $status;
+                    $insertArray["staffid"] = $staffid;
                     $insertArray["staffname"] = $staffname;
                     $insertArray["machineModel"] = $machineModel;
                     $insertArray["model"] = $model;
@@ -415,8 +416,12 @@
                     if (isset($end_date)) {
                         if (trim(date_format(date_create($end_date), 'Y-m-d H:i:s')) != trim($proweight_data['date_end'])) {
                             $updateArray['date_end'] = date_format(date_create($end_date), 'Y-m-d H:i:s');
-                            unset($date_start);
+                            unset($end_date);
                         }
+                    }
+                    if (trim($staffid) != trim($proweight_data['staffid'])) {
+                        $updateArray['staffid'] = $staffid;
+                        unset($staffid);
                     }
                     if (trim($staffname) != trim($proweight_data['staffname'])) {
                         $updateArray['staffname'] = $staffname;
