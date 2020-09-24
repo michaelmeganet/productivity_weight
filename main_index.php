@@ -362,7 +362,9 @@
                     $insertArray["status"] = $status;
                     $insertArray["staffid"] = $staffid;
                     $insertArray["staffname"] = $staffname;
-                    $insertArray["machineModel"] = $machineModel;
+                    $insertArray["mcid"] = $mcid;
+                    $insertArray["machineid"] = $machineid;
+                    #$insertArray["machineModel"] = $machineModel;
                     $insertArray["model"] = $model;
                     $insertArray["date_start"] = $date_start;
                     $insertArray["date_end"] = $end_date;
@@ -382,6 +384,8 @@
                     unset($date_start);
                     unset($end_date);
                     unset($staffname);
+                    unset($mcid);
+                    unset($machineid);
                     unset($machineModel);
                     unset($model);
                     unset($packing);
@@ -427,10 +431,18 @@
                         $updateArray['staffname'] = $staffname;
                         unset($staffname);
                     }
-                    if (trim($machineModel) != trim($proweight_data['machineModel'])) {
-                        $updateArray['machineModel'] = $machineModel;
-                        unset($machineModel);
+                    if (trim($machineid) != trim($proweight_data['machineid'])) {
+                        $updateArray['machineid'] = $machineid;
+                        unset($machineid);
                     }
+                    if (trim($mcid) != trim($proweight_data['mcid'])) {
+                        $updateArray['mcid'] = $mcid;
+                        unset($mcid);
+                    }
+                    #if (trim($machineModel) != trim($proweight_data['machineModel'])) {
+                    #    $updateArray['machineModel'] = $machineModel;
+                    #    unset($machineModel);
+                    #}
                     if (trim($model) != trim($proweight_data['model'])) {
                         $updateArray['model'] = $model;
                         unset($model);

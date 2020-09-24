@@ -243,7 +243,9 @@
                         $cuttingtype = $prodWData['cuttingtype'];
                         $staffid = $prodWData['staffid'];
                         $staffname = $prodWData['staffname'];
-                        $machineModel = $prodWData['machineModel'];
+                        $mcid = $prodWData['mcid'];
+                        $machineid = $prodWData['machineid'];
+                        #$machineModel = $prodWData['machineModel'];
                         $model = $prodWData['model'];
 
                         if ($poid) {
@@ -303,7 +305,9 @@
                             'cuttingtype' => $cuttingtype,
                             'staffid' => $staffid,
                             'staffname' => $staffname,
-                            'machineModel' => $machineModel,
+                            'mcid' => $mcid,
+                            'machineid' => $machineid,
+                            #'machineModel' => $machineModel,
                             'start_time' => $start_time,
                             'end_time' => $end_time,
                             'duration' => $duration,
@@ -370,10 +374,18 @@
                                     $upd_array['staffname'] = $staffname;
                                     unset($staffname);
                                 }
-                                if ($machineModel != $existingData['machineModel']) {
-                                    $upd_array['machineModel'] = $machineModel;
-                                    unset($machineModel);
+                                if ($mcid != $existingData['mcid']) {
+                                    $upd_array['mcid'] = $mcid;
+                                    unset($mcid);
                                 }
+                                if ($machineid != $existingData['machineid']) {
+                                    $upd_array['machineid'] = $machineid;
+                                    unset($machineid);
+                                }
+                                #if ($machineModel != $existingData['machineModel']) {
+                                #    $upd_array['machineModel'] = $machineModel;
+                                #    unset($machineModel);
+                                #}
                                 if ($start_time != $existingData['start_time']) {
                                     $upd_array['start_time'] = $start_time;
                                     unset($start_time);
