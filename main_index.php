@@ -100,8 +100,8 @@
             return $result;
         }
 
-        function search_output_data($outputTbl, $sid, $qid, $quono, $cid) {
-            $qr = "SELECT * FROM $outputTbl WHERE sid = $sid AND qid = $qid AND quono = '$quono' AND cid = $cid";
+        function search_output_data($outputTbl, $sid, $qid, $quono, $cid, $poid) {
+            $qr = "SELECT * FROM $outputTbl WHERE sid = $sid AND qid = $qid AND quono = '$quono' AND cid = $cid AND (poid = '$poid' OR poid IS NULL)";
             $objSQL = new SQL($qr);
 
             $results = $objSQL->getResultOneRowArray();
@@ -206,12 +206,13 @@
                         $staffid = $results2['start_by'];
                         //$startdate = $results2['date_start'];
                         $date_start = $results2['date_start'];
-                        $enddate = $results2['date_end'];
+                        $poid = $results2['poid'];
+                        $end_date = $results2['date_end'];
                         $mcid = $results2['machine_id'];
                         echo"mcid = $mcid\n";
                         $day = date_format(date_create($date_start), 'l');
                         $date = date_format(date_create($date_start), 'd-m-Y');
-                        $netdatetime = strtotime($enddate) - strtotime($date_start);
+                        $netdatetime = strtotime($end_date) - strtotime($date_start);
                         $workhourval = $netdatetime / 3600;
                         $workhouronly = floor($workhourval);
                         $workhourremainder = $workhourval - $workhouronly;
@@ -219,13 +220,14 @@
                         $workminuteonly = floor($workminuteval);
                         $workhour = $workhouronly . " Hours, " . $workminuteonly . " Minutes";
                         //  echo "startdatestr = " . strtotime($startdate) . "<br>";
-                        //   echo "enddatestr = " . strtotime($enddate) . "<br>";
+                        //   echo "enddatestr = " . strtotime($end_date) . "<br>";
                         //   echo "netdatetime = " . $netdatetime . "<br>";
                         //   echo "workhour = " . $workhour . "<br>";
                     } else {
+                        $poid = null;
                         $staffid = null;
                         $date_start = null;
-                        $enddate = null;
+                        $end_date = null;
                         $day = null;
                         $date = null;
                         $netdatetime = null;
@@ -266,7 +268,7 @@
                     }
 
                     //Begin check for qid, quono, and cid
-                    $proweight_data = search_output_data($table, $sid, $qid, $quono, $cid); //--> this checks if the data already exists or not,
+                    $proweight_data = search_output_data($table, $sid, $qid, $quono, $cid, $poid); //--> this checks if the data already exists or not,
                     if ($proweight_data != 'not exists') {
                         throw new Exception('Data already inputted');
                     }
@@ -333,7 +335,7 @@
                     . " dimension = $dimension | process = $process | cuttingtype = $cuttingtype  | cncmach = $cncmach | "
                     . " noposition = $noposition | runningno = $runningno | jobno = $jobno | date_issue = $date_issue | "
                     . " completion_date = $completion_date | dateofcompletion = $dateofcompletion | jlfor = $jlfor | status = $status | "
-                    . " staffname = $staffname |  machineModel  = $machineModel | model = $model | date_start = $date_start | packing = $packing  | operation = $operation | unit_weight = $weight | "
+                    . " staffname = $staffname |  machineModel  = $machineModel | model = $model | date_start = $date_start | end_date = $end_date | packing = $packing  | operation = $operation | unit_weight = $weight | "
                     . " total_weight = $total_weight | index_per_shift = $index_per_shift <br>";
                     echo"################################################################################<br>";
                     $insertArray["wid"] = null;
@@ -356,11 +358,13 @@
                     $insertArray["completion_date"] = $completion_date;
                     $insertArray["dateofcompletion"] = $dateofcompletion;
                     $insertArray["jlfor"] = $jlfor;
+                    $insertArray["poid"] = $poid;
                     $insertArray["status"] = $status;
                     $insertArray["staffname"] = $staffname;
                     $insertArray["machineModel"] = $machineModel;
                     $insertArray["model"] = $model;
                     $insertArray["date_start"] = $date_start;
+                    $insertArray["date_end"] = $end_date;
                     $insertArray["packing"] = $packing;
                     $insertArray["operation"] = $operation;
                     $insertArray["unit_weight"] = $weight;
@@ -375,6 +379,7 @@
                     unset($dateofcompletion);
                     unset($status);
                     unset($date_start);
+                    unset($end_date);
                     unset($staffname);
                     unset($machineModel);
                     unset($model);
@@ -393,13 +398,23 @@
                         $updateArray['dateofcompletion'] = $dateofcompletion;
                         unset($dateofcompletion);
                     }
+                    if (trim($poid) != trim($proweight_data['poid'])) {
+                        $updateArray['poid'] = $poid;
+                        unset($status);
+                    }
                     if (trim($status) != trim($proweight_data['status'])) {
                         $updateArray['status'] = $status;
                         unset($status);
                     }
                     if (isset($date_start)) {
-                        if (trim(date_format(date_create($date_start), 'Y-m-d')) != trim($proweight_data['date_start'])) {
-                            $updateArray['date_start'] = date_format(date_create($date_start), 'Y-m-d');
+                        if (trim(date_format(date_create($date_start), 'Y-m-d H:i:s')) != trim($proweight_data['date_start'])) {
+                            $updateArray['date_start'] = date_format(date_create($date_start), 'Y-m-d H:i:s');
+                            unset($date_start);
+                        }
+                    }
+                    if (isset($end_date)) {
+                        if (trim(date_format(date_create($end_date), 'Y-m-d H:i:s')) != trim($proweight_data['date_end'])) {
+                            $updateArray['date_end'] = date_format(date_create($end_date), 'Y-m-d H:i:s');
                             unset($date_start);
                         }
                     }

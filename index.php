@@ -46,6 +46,12 @@ and open the template in the editor.
        <div>
        <a href="./schedule_output_test.php">check Scheduling output page</a>
        </div>
+       <div>
+       <a href="./make-kpidetail.php">generate KPI Details</a>
+       </div>
+       <div>
+       <a href="./show-kpidetail-table.php">view KPI Detail Table</a>
+       </div>
  
         <script>
             var logVue = new Vue({
