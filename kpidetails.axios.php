@@ -231,11 +231,21 @@ switch ($action) {
         break;
     case 'showKpiDetailTable':
         $period = $received_data->period;
-        $kpidetailtbl = 'kpidetails_'.$period;
+        $kpidetailtbl = 'kpidetails_' . $period;
         $qr = "SELECT * FROM $kpidetailtbl ORDER BY kpidid";
         $objSQL = new SQL($qr);
         $result = $objSQL->getResultRowArray();
         echo json_encode($result);
+        break;
+    case 'getDayList':
+        $period = $received_data->period;
+        $year = '20'.substr($period,0,2);
+        $month = substr($period,2,2);
+        $day = '01';
+        $date = $year.'-'.$month.'-'.$day;
+        #echo $date;
+        $noofdays = date_format(date_create($date),'t');
+        echo $noofdays;
         break;
 }
 
