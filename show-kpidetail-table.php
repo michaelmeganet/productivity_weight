@@ -50,7 +50,10 @@ and open the template in the editor.
         }
         if (isset($period)) {
             $kpidetailstable = "kpidetails_$period";
-            $qr = "SELECT * FROM $kpidetailstable ORDER BY kpidid ASC";
+            // $qr = "SELECT * FROM $kpidetailstable ORDER BY kpidid ASC";
+            $qr = "SELECT * FROM $kpidetailstable WHERE poid IS NOT NULL AND jlfor = 'CJ' AND jobtype != 'cncmach' ".
+            "ORDER  BY staffid, mcid asc  ";
+            echo " $qr =  $qr <br>";
             $objSQL = new SQL($qr);
             $result = $objSQL->getResultRowArray();
             if (!empty($result)) {

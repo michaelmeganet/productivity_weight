@@ -156,7 +156,7 @@
                     $cid = $datarow['cid']; //--> check if this exists or not
                     $sid = $datarow['sid'];
 
-
+                  
                     $jlfor = $datarow['jlfor'];
                     $dateofcompletion = $datarow['dateofcompletion'];
                     $runningno = $datarow['runningno'];
@@ -252,7 +252,7 @@
 
                     if (isset($mcid)) {
                         //Get Machine Data
-                        $qr4 = "SELECT * FROM machine2020 WHERE mcid = $mcid";
+                        $qr4 = "SELECT * FROM machine WHERE mcid = $mcid";
                         $objSQL4 = new SQL($qr4);
                         $results4 = $objSQL4->getResultOneRowArray();
                         $machineid = $results4['machineid'];
