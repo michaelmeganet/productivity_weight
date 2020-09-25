@@ -281,7 +281,7 @@ and open the template in the editor.
                 }
 
                 function get_machineDetails($mcid) {
-                    $qr = "SELECT * FROM machine2020 WHERE mcid = $mcid";
+                    $qr = "SELECT * FROM machine WHERE mcid = $mcid";
                     $objSQL = new SQL($qr);
                     $result = $objSQL->getResultOneRowArray();
                     if (!empty($result)) {
