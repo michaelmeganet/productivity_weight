@@ -52,6 +52,22 @@ and open the template in the editor.
        <div>
        <a href="./show-kpidetail-table.php">view KPI Detail Table</a>
        </div>
+       <div>
+           <table>
+               <tr>
+                   <td colspan="2">Show Summary : </td>
+               </tr>
+               <tr>
+                   <td>&nbsp;&nbsp;</td>
+                   <td><a href="./summary-kpi-simple.php">view KPI Monthly Summary (Simplified)</a></td>
+               </tr>
+               <tr>
+                   <td>&nbsp;&nbsp;</td>
+                   <td><a href="./summary-kpi.php">view KPI Summary (Detailed)</a></td>
+               </tr>
+           </table>
+       
+       </div>
  
         <script>
             var logVue = new Vue({

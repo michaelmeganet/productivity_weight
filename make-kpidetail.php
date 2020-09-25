@@ -229,6 +229,7 @@
                         $kpidid = null;
                         $poid = $prodWData['poid'];
                         $sid = $prodWData['sid'];
+                        $quono = $prodWData['quono'];
                         $qid = $prodWData['qid'];
                         $jobcode = $prodWData['jobcode'];
                         $grade = $prodWData['grade'];
@@ -287,6 +288,7 @@
                             'kpidid' => $kpidid,
                             'sid' => $sid,
                             'qid' => $qid,
+                            'quono' => $quono,
                             'jobcode' => $jobcode,
                             'jobtype' => $jobtype,
                             'grade' => $grade,
