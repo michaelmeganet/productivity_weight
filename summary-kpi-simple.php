@@ -56,7 +56,10 @@ and open the template in the editor.
                     $year = '20' . substr($period, 0, 2);
                     $month = substr($period, 2, 2);
                     $date = $year . '-' . $month . '-' . $day;
-                    echo "<h5>Summary KPI by Staff (PERIOD = $period)</h5><br>";
+                    echo "<div style='text-align:center'>";
+                    echo "<b style='font-size:2em'>KPI MONTHLY SUMMARY BY STAFF NAME, MACHINE</b><br>";
+                    echo "<h2>PERIOD = $year-$month</h2><br>";
+                    echo "</div>";
                     try {
                         $staffList = get_distinctStaff($kpidetailstable, $date, $summType);
                         if ($staffList == 'empty') {

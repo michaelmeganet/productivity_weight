@@ -85,11 +85,16 @@ and open the template in the editor.
                     }
                     $day = sprintf('%02d', $i_day);
                     #echo "selected day = $day<br>";
-                    echo "Total date in this month = $totaldate";
-                    echo "<h2>Summary KPI by Staff ($summType)</h2><br>";
+                    #echo "Total date in this month = $totaldate";
+                    echo "<div style='text-align:center'>";
                     if ($summType == 'daily') {
-                        echo "Selected Date is : $date<br>";
+                        echo "<b style='font-size:2em'>KPI INDEX DAILY DETAILS REPORT</b><br>";
+                        echo "<h2>DATE = $day-$month-$year</h2><br>";
+                    } else {
+                        echo "<b style='font-size:2em'>KPI INDEX MONTHLY DETAILS REPORT</b><br>";
+                        echo "<h2>DATE = $month-$year</h2><br>";
                     }
+                    echo "</div>";
                     for ($i = $i_day; $i <= $totaldate; $i++) {
                         $day = sprintf('%02d', $i);
                         $date = $year . '-' . $month . '-' . $day;
