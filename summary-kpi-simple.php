@@ -93,7 +93,7 @@ and open the template in the editor.
                                 if ($filteredDetails != 'empty') {
                                     //begin calculate kpi (based on staffid and mcid
                                     $index_gain_sum = 0;
-                                    $det_kpi_row = array();
+                                    #$det_kpi_row = array();
                                     foreach ($filteredDetails as $data_row) {
                                         $jd_qty = $data_row['jobdonequantity'];
                                         $unit_weight = $data_row['unit_weight'];
@@ -110,14 +110,12 @@ and open the template in the editor.
                                         $index_gain_sum = $index_gain_sum + ($index_gain_in_kg * $kpiVal);
                                     }
                                     if ($index_per_shift) {
-                                        $calculatedKPI = round($index_gain_sum / $index_per_shift,3);
+                                        $calculatedKPI = round($index_gain_sum / $index_per_shift, 3);
                                     } else {
                                         $calculatedKPI = 0;
                                     }
                                     //create array of the current sum
-                                    $det_KPI[] = array(
-                                        'staffid' => $staffid,
-                                        'staffname' => $staffname,
+                                    $det_kpi_row[] = array(
                                         'machineid' => $machineid,
                                         'machinename' => $machine_name,
                                         'machinemodel' => $machine_model,
@@ -128,6 +126,12 @@ and open the template in the editor.
                                     
                                 }
                             }
+                            $det_KPI[] = array(
+                                'staffid' => $staffid,
+                                'staffname' => $staffname,
+                                'details' => $det_kpi_row
+                            );
+                            unset($det_kpi_row);
                         }
                     } catch (Exception $ex) {
                         $code = $ex->getCode();
@@ -141,35 +145,54 @@ and open the template in the editor.
                     #. "Data List :";
                     #print_r($det_KPI);
                     #echo "</pre>";
-                    ?>
-                    <table>
-                        <thead>
-                            <?php
-                            foreach ($det_KPI as $data_row) {
-                                echo "<tr>";
-                                #print_r();
-                                foreach ($data_row as $key => $row) {
-                                    echo "<th>$key</th>";
-                                }
-                                echo "</tr>";
-                                break;
-                            }
-                            ?>
-                        </thead>
-                        <tbody>
-                            <?php
-                            foreach ($det_KPI as $data_row) {
-                                echo "<tr>";
-                                #print_r();
-                                foreach ($data_row as $key => $val) {
-                                    echo "<td>$val</td>";
-                                }
-                                echo "</tr>";
-                            }
-                            ?>
 
-                        </tbody>
-                    </table>
+                    foreach ($det_KPI as $data) {
+                        $stid = $data['staffid'];
+                        $stnm = $data['staffname'];
+                        $dtl = $data['details'];
+                        ?>
+                        <table style="width:auto">
+                            <thead>
+                                <tr>
+                                    <th><?php echo $stid; ?></th>
+                                    <th><?php echo $stnm; ?></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                        </table>
+                        <table>
+                            <thead>
+                                <?php
+                                foreach ($dtl as $data_row) {
+                                    echo "<tr>";
+                                    #print_r();
+                                    foreach ($data_row as $key => $row) {
+                                        echo "<th style='width:10%'>$key</th>";
+                                    }
+                                    echo "</tr>";
+                                    break;
+                                }
+                                ?>
+                            </thead>
+                            <tbody>
+                                <?php
+                                foreach ($dtl as $data_row) {
+                                    echo "<tr>";
+                                    #print_r();
+                                    foreach ($data_row as $key => $val) {
+                                        echo "<td style='width:10%'>$val</td>";
+                                    }
+                                    echo "</tr>";
+                                }
+                                ?>
+
+                            </tbody>
+                        </table>
+                        <br>
+                        <br>
+                        <?php
+                    }
+                    ?>
                     <?php
                 }
 
