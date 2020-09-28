@@ -97,7 +97,9 @@ and open the template in the editor.
                                     //begin calculate kpi (based on staffid and mcid
                                     $index_gain_sum = 0;
                                     #$det_kpi_row = array();
+                                    $cnt = 0;
                                     foreach ($filteredDetails as $data_row) {
+                                        $cnt++;
                                         $jd_qty = $data_row['jobdonequantity'];
                                         $unit_weight = $data_row['unit_weight'];
                                         $start_time = $data_row['start_time'];
@@ -122,7 +124,9 @@ and open the template in the editor.
                                         'machineid' => $machineid,
                                         'machinename' => $machine_name,
                                         'machinemodel' => $machine_model,
+                                        'index_gain_sum' => $index_gain_sum,
                                         'totalkpi' => $calculatedKPI,
+                                        'data_found' => $cnt
                                     );
                                     //push this to det_KPI array
                                 } else {

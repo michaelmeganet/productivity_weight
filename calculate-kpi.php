@@ -73,9 +73,12 @@ $kpidata = 'production_weight_' . $period;
 
 
 //echo "tbldata = $tbldata;;  tbloutput = $tbloutput";
-$sqlName  = "SELECT DISTINCT staffname FROM $kpidata ";
+$sqlName  = "SELECT DISTINCT staffname FROM $kpidata WHERE poid IS NOT NULL AND jlfor = 'CJ' AND DATE_FORMAT(dateofcompletion,'%Y %m') = DATE_FORMAT('2020-09-00','%Y %m') AND staffname IS NOT NULL";
+#echo "query = $sqlName<br>\n";
 $objSQLname = new SQL($sqlName );
 $namelist = $objSQLname->getResultRowArray();
+#print_r($namelist);
+#echo"<br>";
 $count = 0;
 $index_gain = 0;
 foreach($namelist as $array) { 
@@ -84,11 +87,12 @@ foreach($namelist as $array) {
         $count = 0;
         ${$key} = $value; 
         //echo "$key : $value\n"."<br>";
-        $sqlCount = "SELECT count(*) FROM $kpidata WHERE staffname = '$value' ";
+        $sqlCount = "SELECT count(*) FROM $kpidata WHERE poid IS NOT NULL AND jlfor = 'CJ' AND staffname = '$value' AND DATE_FORMAT(dateofcompletion,'%Y %m') = DATE_FORMAT('2020-09-00','%Y %m') ";
+        #echo "queryCount = $sqlCount<br>\n";
         $objcount = new SQL($sqlCount);
         $recordCount = $objcount->getRowCount();
         echo "record(s) counted of $value in $kpidata is/are ".$recordCount ."<br>";
-        $qr = "SELECT * FROM $kpidata WHERE staffname = '$value' ORDER BY sid, date_start ASC	";
+        $qr = "SELECT * FROM $kpidata WHERE poid IS NOT NULL AND jlfor = 'CJ' AND staffname = '$value' AND DATE_FORMAT(dateofcompletion,'%Y %m') = DATE_FORMAT('2020-09-00','%Y %m') ORDER BY sid, date_start ASC";
 
         //echo "\$qr = $qr <br>";
         $objSQL = new SQL($qr);
@@ -97,10 +101,11 @@ foreach($namelist as $array) {
 
         // $table = "production_weight_".$period; 
         ?>
+            <div style="max-height: 350px;overflow-y: scroll">
         <table style="width: 100%;">
         <tr>
             <th>sid</th><th>qid</th><th>Job Code</th><th>Grade</th><th>Quantity</th><th>Unit weight</th><th>Total Weight</th><th>Dimensions</th><th>jlfor</th><th>Index Gain in KG</th>
-            <th>jobno</th><th>date of completion</th><th>cid</th><th>Cutting type</th><th>Staff Name</th><th>Machine Model</th>
+            <th>jobno</th><th>date of completion</th><th>cid</th><th>Cutting type</th><th>Staff Name</th><th>Machine ID</th><th>Machine Name</th>
             <th>Start Date</th><th>Model</th>
         </tr> 
 
@@ -131,14 +136,18 @@ foreach($namelist as $array) {
                 $cid = $datarow['cid'];
                 $cuttingtype = $datarow['cuttingtype'];
                 $staffname = $datarow['staffname'];
-                $machineModel = $datarow['machineModel'];
+                $machineid = $datarow['machineid'];
+                $qr = "SELECT * FROM machine WHERE machineid = '$machineid'";
+                $objSQLmc = new SQL($qr);
+                $machineName = $objSQLmc->getResultOneRowArray()['name'];
                 //echo "sid = $sid<br>";
                 $startdate = $datarow['date_start'];
                 $model = $datarow['model'];
-                $index_gain_in_kg = $total_weight * $quantity;
+                $index_gain_in_kg = $unit_weight * $quantity;
                 $index_per_shift = $datarow['index_per_shift'];
                 if(isset($index_gain_in_kg)){
-                    $index_gain_in_kg = floatval($index_gain_in_kg);
+                    $index_gain_in_kg = floatval($index_gain_in_kg) * 9.8;
+                    #$index_gain_in_kg = floatval($index_gain_in_kg);
                     $index_gain = $index_gain + $index_gain_in_kg;
                 }
         
@@ -146,10 +155,11 @@ foreach($namelist as $array) {
             echo 
             "<tr>
                 <td>$sid</td><td>$qid</td><td>$jobcode</td><td>$grade</td><td>$quantity</td><td>$unit_weight</td><td>$total_weight</td><td>$dimension</td><td>$jlfor</td><td>$index_gain_in_kg</td>
-                <td>$jobno</td><td>$dateofcompletion</td><td>$cid</td><td>$cuttingtype</td><td>$staffname</td><td>$machineModel</td>
+                <td>$jobno</td><td>$dateofcompletion</td><td>$cid</td><td>$cuttingtype</td><td>$staffname</td><td>$machineid</td><td>$machineName</td>
                 <td>$startdate</td><td>$model</td>
             
             </tr>";
+            
             // echo "qid = $qid | quono = $quono | company = $company | cid = $cid | quantity = $quantity | grade = $grade | "
             //      . " dimension = $dimension | process = $process | cuttingtype = $cuttingtype  | cncmach = $cncmach | " 
             //      ." noposition = $noposition | runningno = $runningno | jobno = $jobno | date_issue = $date_issue | "
@@ -169,18 +179,21 @@ foreach($namelist as $array) {
         finally{
 
         }
+        echo "</table></div>";
         echo "\$count = $count , \$recordCount = $recordCount <br>";
         if($count == $recordCount){
             if($index_per_shift > 0.00){
-            $KPI_weekday  = number_format($index_gain/$index_per_shift * 9.8, 2);
-            $KPI_holiday = number_format($index_gain/$index_per_shift * 7.35, 2);
+            #$KPI_weekday  = number_format($index_gain/$index_per_shift * 9.8, 2);
+            #$KPI_holiday = number_format($index_gain/$index_per_shift * 7.35, 2);
+            $KPI_weekday  = number_format($index_gain/$index_per_shift, 2);
+            $KPI_holiday = number_format($index_gain/$index_per_shift, 2);
             }else{
                 $KPI_weekday = "no value";
                 $KPI_holiday = "no value";
             }
 
             echo "The total index gain in KG for $value is $index_gain <br>";
-            echo "The index per shift of $model, $machineModel is $index_per_shift <br> ";
+            echo "The index per shift of $model, $machineid  -  $machineName is $index_per_shift <br> ";
             echo "The weekday KPI is $KPI_weekday <br>";
             $index_gain = 0;
         }
@@ -192,7 +205,6 @@ foreach($namelist as $array) {
      
 ?>
 
-</table>
 
 
 
