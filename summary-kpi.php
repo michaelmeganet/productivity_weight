@@ -162,7 +162,7 @@ and open the template in the editor.
                                             //slide in the individual value into data_row;
                                             $offset = 12;
                                             $new_datarow = array_slice($data_row, 0, $offset, true) +
-                                                    array('individual_kpi' => round($inv_KPI,7)) +
+                                                    array('individual_kpi' => number_format(round($inv_KPI,7),7)) +
                                                     array_slice($data_row, $offset, NULL, true);
                                             #$data_row['individual_kpi'] = $inv_KPI;
                                             $det_kpi_row_details[] = $new_datarow;
