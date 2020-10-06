@@ -162,7 +162,7 @@ and open the template in the editor.
                                             //slide in the individual value into data_row;
                                             $offset = 12;
                                             $new_datarow = array_slice($data_row, 0, $offset, true) +
-                                                    array('individual_kpi' => number_format(round($inv_KPI,7),7)) +
+                                                    array('individual_kpi' => number_format(round($inv_KPI, 7), 7)) +
                                                     array_slice($data_row, $offset, NULL, true);
                                             #$data_row['individual_kpi'] = $inv_KPI;
                                             $det_kpi_row_details[] = $new_datarow;
@@ -201,64 +201,68 @@ and open the template in the editor.
                     #. "Data List :";
                     #print_r($det_KPI);
                     #echo "</pre>";
-                    foreach ($det_KPI as $date => $kpi_row) {
-                        echo "<h3>$date</h3><br>";
-                        foreach ($kpi_row as $key => $data) {
-                            ?>
-                            <table style="width:auto">
+                    if (!empty($det_KPI)) {
+                        foreach ($det_KPI as $date => $kpi_row) {
+                            echo "<h3>$date</h3><br>";
+                            foreach ($kpi_row as $key => $data) {
+                                ?>
+                                <table style="width:auto">
+                                    <tr>
+                                        <th><?php echo "(" . $data['staffid'] . ") " . $data['staffname']; ?></td>
+                                        <th><?php echo "" . $data['machinename'] . " - " . $data['machinemodel']; ?></td>
+                                    </tr>
+                                </table>
                                 <tr>
-                                    <th><?php echo "(" . $data['staffid'] . ") " . $data['staffname']; ?></td>
-                                    <th><?php echo "" . $data['machinename'] . " - " . $data['machinemodel']; ?></td>
-                                </tr>
-                            </table>
-                            <tr>
-                                <td colspan="10">
-                                    <?php
-                                    #echo "<h4>" . $data['staffid'] . " >> " . $data['staffname'] . " >> " . $data['machinename'] . " >> " . $data['machinemodel'] . " </h4><br>";
-                                    $details = $data['details'];
-                                    ?>
-                                    <table>
-                                        <thead>
-                                            <?php
-                                            foreach ($details as $data_row) {
-                                                echo "<tr>";
-                                                #print_r();
-                                                foreach ($data_row as $key => $row) {
-                                                    echo "<th>$key</th>";
-                                                }
-                                                echo "</tr>";
-                                                break;
-                                            }
-                                            ?>
-                                        </thead>
-                                        <tbody>
-                                            <?php
-                                            foreach ($details as $data_row) {
-                                                echo "<tr>";
-                                                #print_r();
-                                                foreach ($data_row as $key => $val) {
-                                                    echo "<td>$val</td>";
-                                                }
-                                                echo "</tr>";
-                                            }
-                                            ?>
-
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
-                            <table style="width:auto">
-                                <tr>
-                                    <td colspan="2" style="width:auto">
+                                    <td colspan="10">
                                         <?php
-                                        echo "<b>Total KPI = " . round($data['totalkpi'], 3) . "</b><br>";
+                                        #echo "<h4>" . $data['staffid'] . " >> " . $data['staffname'] . " >> " . $data['machinename'] . " >> " . $data['machinemodel'] . " </h4><br>";
+                                        $details = $data['details'];
                                         ?>
+                                        <table>
+                                            <thead>
+                                                <?php
+                                                foreach ($details as $data_row) {
+                                                    echo "<tr>";
+                                                    #print_r();
+                                                    foreach ($data_row as $key => $row) {
+                                                        echo "<th>$key</th>";
+                                                    }
+                                                    echo "</tr>";
+                                                    break;
+                                                }
+                                                ?>
+                                            </thead>
+                                            <tbody>
+                                                <?php
+                                                foreach ($details as $data_row) {
+                                                    echo "<tr>";
+                                                    #print_r();
+                                                    foreach ($data_row as $key => $val) {
+                                                        echo "<td>$val</td>";
+                                                    }
+                                                    echo "</tr>";
+                                                }
+                                                ?>
+
+                                            </tbody>
+                                        </table>
                                     </td>
                                 </tr>
-                            </table>
-                            <hr><br>
-                            <?php
+                                <table style="width:auto">
+                                    <tr>
+                                        <td colspan="2" style="width:auto">
+                                            <?php
+                                            echo "<b>Total KPI = " . number_format(round($data['totalkpi'], 7),7) . "</b><br>";
+                                            ?>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <hr><br>
+                                <?php
+                            }
                         }
+                    }else{
+                        echo "Cannot find data for $day-$month-$year";
                     }
                     ?>
 
