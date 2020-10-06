@@ -136,7 +136,7 @@ and open the template in the editor.
                                     $filteredDetails = get_filteredDetails($kpidetailstable, $date, $summType, $staffid, $mcid);
                                     if ($filteredDetails != 'empty') {
                                         //begin calculate kpi (based on staffid and mcid
-                                        $index_gain_sum = 0;
+                                        $calculatedKPI = 0;
                                         $cnt = 0;
                                         foreach ($filteredDetails as $data_row) {
                                             $cnt++;
@@ -152,13 +152,20 @@ and open the template in the editor.
                                             //fetch current KPI
                                             $kpiVal = get_kpiTimeTableDetails($start_time);
                                             #echo "kpiVal = $kpiVal<br>";
-                                            $index_gain_sum = $index_gain_sum + ($index_gain_in_kg * $kpiVal);
-                                            $det_kpi_row_details[] = $data_row;
-                                        }
-                                        if ($index_per_shift) {
-                                            $calculatedKPI = $index_gain_sum / $index_per_shift;
-                                        } else {
-                                            $calculatedKPI = 0;
+                                            $single_KPI = ($index_gain_in_kg * $kpiVal);
+                                            if ($index_per_shift) {
+                                                $inv_KPI = $single_KPI / $index_per_shift;
+                                            } else {
+                                                $inv_KPI = 0;
+                                            }
+                                            $calculatedKPI += $inv_KPI;
+                                            //slide in the individual value into data_row;
+                                            $offset = 12;
+                                            $new_datarow = array_slice($data_row, 0, $offset, true) +
+                                                    array('individual_kpi' => round($inv_KPI,7)) +
+                                                    array_slice($data_row, $offset, NULL, true);
+                                            #$data_row['individual_kpi'] = $inv_KPI;
+                                            $det_kpi_row_details[] = $new_datarow;
                                         }
                                         //create array of the current sum
                                         #echo "Generating staffid = $staffid, machine id = $machineid<br>Found $cnt Data<br> <strong>Total KPI is $calculatedKPI.</strong><br>";
