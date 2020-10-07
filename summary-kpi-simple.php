@@ -37,6 +37,13 @@ and open the template in the editor.
                     <select v-model='period' id='period' name='period' @change="summType=''">
                         <option v-for='data in periodList' v-bind:value='data'>{{data}}</option>
                     </select>
+                </div>
+                <div> <!--period area-->
+                    Status :
+                    <select v-model='jobstatus' id='jobstatus' name='jobstatus' @change="summType=''">
+                        <option value='finished'>Finished Jobs</option>
+                        <option value='unfinished'>Unfinished Jobs</option>
+                    </select>
                     <button type="submit" >Submit</button>
                 </div>
             </form>
@@ -47,9 +54,11 @@ and open the template in the editor.
                 include_once 'class/dbh.inc.php';
                 include_once 'class/variables.inc.php';
                 include_once 'class/phhdate.inc.php';
+                include_once 'class/joblistwork.inc.php';
 
-                if (isset($_POST['period'])) {
+                if (isset($_POST['period']) && (isset($_POST['jobstatus']))) {
                     $period = $_POST['period'];
+                    $jobstatus = $_POST['jobstatus'];
                     $summType = 'all';
                     $day = '00';
                     $kpidetailstable = 'kpidetails_' . $period;
@@ -58,9 +67,13 @@ and open the template in the editor.
                     $date = $year . '-' . $month . '-' . $day;
                     echo "<div style='text-align:center'>";
                     echo "<b style='font-size:2em'>KPI MONTHLY SUMMARY BY STAFF NAME, MACHINE</b><br>";
-                    echo "<h2>PERIOD = $year-$month</h2><br>";
+                    echo "<h2>JOBS = " . strtoupper($jobstatus) . "&nbsp;&nbsp;PERIOD = $year-$month</h2><br>";
                     echo "</div>";
+
                     try {
+                        if ($jobstatus == 'unfinished') {
+                            throw new Exception('begin unfinished records', 191);
+                        }
                         $staffList = get_distinctStaff($kpidetailstable, $date, $summType);
                         if ($staffList == 'empty') {
                             throw new Exception('There\'s no staff found!', 101);
@@ -144,7 +157,77 @@ and open the template in the editor.
                         $code = $ex->getCode();
                         switch ($code) {
                             case 101: //cannot find staff list
+                                //check if current status is unfinished or not
                                 echo "Cannot find Staff for period = $period.<br>";
+                                break;
+                            case 191: //begin unfinished jobs
+                                $qrU = "SELECT * FROM $kpidetailstable WHERE poid IS NULL AND jlfor = 'CJ'";
+                                $objSQLU = new SQL($qrU);
+                                $kpiData = $objSQLU->getResultRowArray();
+                                echo "qr = $qrU<br>";
+                                echo "Found " . count($kpiData) . " Datas.<br>";
+                                #echo "<pre>";
+                                #print_r($result);
+                                #echo "</pre>";
+                                $unfinKPIDetails = array();
+                                foreach ($kpiData as $data_row) {
+                                    $schedulingtable = "production_scheduling_$period";
+                                    $jobcode = $data_row['jobcode'];
+                                    $cuttingtype = $data_row['cuttingtype'];
+                                    $sid = $data_row['sid'];
+                                    $qrSID = "SELECT process FROM $schedulingtable WHERE sid = $sid";
+                                    $objSQLSID = NEW SQL($qrSID);
+                                    $resultProcessCode = $objSQLSID->getResultOneRowArray();
+                                    $processcode = $resultProcessCode['process'];
+                                    $totalquantity = $data_row['totalquantity'];
+                                    $objJWDetail = new JOB_WORK_DETAIL($jobcode, $cuttingtype, $processcode, $totalquantity);
+                                    $ex_jobwork = $objJWDetail->get_ex_jobWork();
+                                    #echo "sid = $sid; jobcode = $jobcode; cuttingtype = $cuttingtype; processcode = $processcode; totalquantity = $totalquantity<br>";
+                                    #print_r($ex_jobwork);
+                                    #echo "<br>";
+                                    if ($ex_jobwork['millingwidth'] == 'true' && $ex_jobwork['millinglength'] == 'true') {
+                                        
+                                    } else {
+                                        foreach ($ex_jobwork as $processname => $processstatus) {
+                                            if ($processstatus == 'true') {
+                                                $rand_index_per_shift = get_randomVirtualValues($processname);
+                                                $unit_weight = $data_row['unit_weight'];
+                                                if ($totalquantity != 0) {
+                                                    $index_gain_in_kg = $unit_weight * $totalquantity;
+                                                } else {
+                                                    $index_gain_in_kg = 0;
+                                                }
+                                                $inv_Nu_KPI = $index_gain_in_kg / $rand_index_per_shift * 9.8;
+                                                //slide in the individual value into data_row;
+                                                $offset = 12;
+                                                $data_row['index_gain_in_kg'] = $index_gain_in_kg;
+                                                $new_datarow = array_slice($data_row, 0, $offset, true) +
+                                                        array('individual_kpi' => number_format(round($inv_Nu_KPI, 7), 7)) +
+                                                        array_slice($data_row, $offset, NULL, true);
+                                                $unfinKPIDetails[$processname][] = $new_datarow;
+                                            }
+                                        }
+                                    }
+                                }
+                                foreach ($unfinKPIDetails as $processname => $details) {
+                                    $machinename = get_virtualMachineName($processname);
+                                    $totaldata = count($details);
+                                    $sum_index_gain = 0;
+                                    $sum_KPI = 0;
+                                    foreach ($details as $detail_row) {
+                                        $sum_index_gain += $detail_row['index_gain_in_kg'];
+                                        $sum_KPI += $detail_row['individual_kpi'];
+                                    }
+                                    $det_KPI[] = array(
+                                        'machinename' => $machinename,
+                                        'index_gain_sum' => $sum_index_gain,
+                                        'totalkpi' => $sum_KPI,
+                                        'data_found' => $totaldata
+                                    );
+                                }
+                                #echo "<pre>";
+                                #print_r($det_KPI);
+                                #echo "</pre>";
                                 break;
                         }
                     }
@@ -152,55 +235,159 @@ and open the template in the editor.
                     #. "Data List :";
                     #print_r($det_KPI);
                     #echo "</pre>";
+                    if ($jobstatus == 'finished') {
+                        foreach ($det_KPI as $data) {
+                            $stid = $data['staffid'];
+                            $stnm = $data['staffname'];
+                            $dtl = $data['details'];
+                            ?>
+                            <table style="width:auto">
+                                <thead>
+                                    <tr>
+                                        <th><?php echo $stid; ?></th>
+                                        <th><?php echo $stnm; ?></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                            </table>
+                            <table>
+                                <thead>
+                                    <?php
+                                    foreach ($dtl as $data_row) {
+                                        echo "<tr>";
+                                        #print_r();
+                                        foreach ($data_row as $key => $row) {
+                                            echo "<th style='width:10%'>$key</th>";
+                                        }
+                                        echo "</tr>";
+                                        break;
+                                    }
+                                    ?>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    foreach ($dtl as $data_row) {
+                                        echo "<tr>";
+                                        #print_r();
+                                        foreach ($data_row as $key => $val) {
+                                            echo "<td style='width:10%'>$val</td>";
+                                        }
+                                        echo "</tr>";
+                                    }
+                                    ?>
 
-                    foreach ($det_KPI as $data) {
-                        $stid = $data['staffid'];
-                        $stnm = $data['staffname'];
-                        $dtl = $data['details'];
+                                </tbody>
+                            </table>
+                            <br>
+                            <br>
+                            <?php
+                        }
+                    } else {
                         ?>
-                        <table style="width:auto">
-                            <thead>
-                                <tr>
-                                    <th><?php echo $stid; ?></th>
-                                    <th><?php echo $stnm; ?></th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                        </table>
                         <table>
                             <thead>
-                                <?php
-                                foreach ($dtl as $data_row) {
-                                    echo "<tr>";
-                                    #print_r();
-                                    foreach ($data_row as $key => $row) {
-                                        echo "<th style='width:10%'>$key</th>";
+                                <tr>
+                                    <?php
+                                    foreach($det_KPI as $data_row){
+                                        foreach($data_row as $key=>$val){
+                                            echo "<th>$key</th>";
+                                        }
+                                        break;
                                     }
-                                    echo "</tr>";
-                                    break;
-                                }
-                                ?>
+                                    ?>
+                                </tr>
                             </thead>
                             <tbody>
-                                <?php
-                                foreach ($dtl as $data_row) {
-                                    echo "<tr>";
-                                    #print_r();
-                                    foreach ($data_row as $key => $val) {
-                                        echo "<td style='width:10%'>$val</td>";
+                                    <?php
+                                    foreach($det_KPI as $data_row){
+                                        echo "<tr>";
+                                        foreach($data_row as $key=>$val){
+                                            echo "<td>$val</td>";
+                                        }
+                                        echo "</tr>";
                                     }
-                                    echo "</tr>";
-                                }
-                                ?>
-
+                                    ?>
+                                
                             </tbody>
                         </table>
-                        <br>
-                        <br>
                         <?php
                     }
                     ?>
                     <?php
+                }
+
+                function get_virtualMachineName($processname) {
+                    switch ($processname) {
+                        case 'cncmachining':
+                            $machinename = 'Virtual CNC Machine';
+                            break;
+                        case 'manual':
+                            $machinename = 'Virtual Manual Cut Machine';
+                            break;
+                        case 'bandsaw':
+                            $machinename = 'Virtual Bandsaw Machine';
+                            break;
+                        case 'milling':
+                            $machinename = 'Virtual Milling Machine (Surface)';
+                            break;
+                        case 'millingwidth':
+                            $machinename = 'Virtual Milling Machine (Side|Width)';
+                            break;
+                        case 'millinglength':
+                            $machinename = 'Virtual Milling Machine (Side|Length)';
+                            break;
+                        case 'roughgrinding':
+                            $machinename = 'Virtual Rough Grinding Machine';
+                            break;
+                        case 'precisiongrinding':
+                            $machinename = 'Virtual Surface Grinding Machine';
+                            break;
+                    }
+                    return $machinename;
+                }
+
+                function get_randomVirtualValues($processname) {
+                    $qr = "SELECT DISTINCT index_per_hour FROM machine WHERE index_per_hour IS NOT NULL AND index_per_hour != 0 AND ";
+                    switch ($processname) {
+                        case 'cncmachining':
+                            $qr .= "  machineid LIKE 'CNC%' ";
+                            break;
+                        case 'manual':
+                            $qr .= "  machineid LIKE 'MCT%' ";
+                            break;
+                        case 'bandsaw':
+                            $qr .= "  machineid LIKE 'BSC%' ";
+                            break;
+                        case 'milling':
+                            $qr .= "  machineid LIKE 'MMG%' AND name LIKE '%surface%' ";
+                            break;
+                        case 'millingwidth':
+                            $qr .= "  machineid LIKE 'MMG%' AND name LIKE '%side%' ";
+                            break;
+                        case 'millinglength':
+                            $qr .= "  machineid LIKE 'MMG%' AND name LIKE '%side%' ";
+                            break;
+                        case 'roughgrinding':
+                            $qr .= "  machineid LIKE 'RGG%' ";
+                            break;
+                        case 'precisiongrinding':
+                            $qr .= "  machineid LIKE 'SGG%' ";
+                            break;
+                    }
+                    $objSQL = new SQL($qr);
+                    $result = $objSQL->getResultRowArray();
+                    $arr_index_per_hour = array();
+                    foreach ($result as $data_row) {
+                        foreach ($data_row as $key => $val) {
+                            $arr_index_per_hour[] = $val;
+                        }
+                    }
+                    #echo"<pre>Index Per Hour Array Random Value (Virtual $processname):";
+                    #print_r($arr_index_per_hour);
+                    #echo "</pre>";
+                    $rand_index_per_hour = array_rand($arr_index_per_hour, 1);
+                    #echo "Selected Random Value : {$arr_index_per_hour[$rand_index_per_hour]}<br>";
+                    return $arr_index_per_hour[$rand_index_per_hour];
                 }
 
                 function get_staffDetails($staffid) {
@@ -244,12 +431,12 @@ and open the template in the editor.
                 function get_filteredDetails($table, $date, $summType, $staffid, $mcid) {
                     if ($summType == 'daily') {
                         $qr = "SELECT * FROM $table "
-                                . "WHERE poid IS NOT NULL AND jlfor = 'CJ' AND NOT jobtype ='cncmach' AND staffid = '$staffid' "
+                                . "WHERE poid IS NOT NULL AND jlfor = 'CJ' AND NOT jobtype ='cncmachining' AND staffid = '$staffid' "
                                 . "AND mcid = $mcid AND DATE_FORMAT(dateofcompletion,'%Y %m %d') = DATE_FORMAT('$date','%Y %m %d') "
                                 . "ORDER BY dateofcompletion, staffid, mcid ASC";
                     } elseif ($summType == 'all') {
                         $qr = "SELECT * FROM $table "
-                                . "WHERE poid IS NOT NULL AND jlfor = 'CJ' AND NOT jobtype ='cncmach' AND staffid = '$staffid' "
+                                . "WHERE poid IS NOT NULL AND jlfor = 'CJ' AND NOT jobtype ='cncmachining' AND staffid = '$staffid' "
                                 . "AND mcid = $mcid AND DATE_FORMAT(dateofcompletion,'%Y %m') = DATE_FORMAT('$date','%Y %m') "
                                 . "ORDER BY dateofcompletion, staffid, mcid ASC";
                     }
@@ -314,6 +501,7 @@ var sumKPIVue = new Vue({
         summType: '',
         day: '',
         loading: false,
+        jobstatus: 'finished',
 
         periodList: '',
         dayList: '',
