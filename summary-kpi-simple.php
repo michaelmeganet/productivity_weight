@@ -137,7 +137,7 @@ and open the template in the editor.
                                         'machineid' => $machineid,
                                         'machinename' => $machine_name,
                                         'machinemodel' => $machine_model,
-                                        'index_gain_sum' => $index_gain_sum,
+                                        'weight_gain' => $index_gain_sum,
                                         'totalkpi' => $calculatedKPI,
                                         'data_found' => $cnt
                                     );
@@ -220,7 +220,7 @@ and open the template in the editor.
                                     }
                                     $det_KPI[] = array(
                                         'machinename' => $machinename,
-                                        'index_gain_sum' => $sum_index_gain,
+                                        'weight_gain' => $sum_index_gain,
                                         'totalkpi' => $sum_KPI,
                                         'data_found' => $totaldata
                                     );
@@ -247,6 +247,13 @@ and open the template in the editor.
                                         <th><?php echo $stid; ?></th>
                                         <th><?php echo $stnm; ?></th>
                                         <th></th>
+                                    </tr>
+                                    <tr>
+                                        <th colspan="3">
+                                            <?php
+                                            echo "The finished job done KPI by $stnm in the month of $year-$month,\nSummarized by Machine Models below :"
+                                            ?>
+                                        </th>
                                     </tr>
                                 </thead>
                             </table>
