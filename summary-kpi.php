@@ -158,7 +158,7 @@ and open the template in the editor.
                                             } else {
                                                 $inv_KPI = 0;
                                             }
-                                            $calculatedKPI += round($inv_KPI,7);
+                                            $calculatedKPI += round($inv_KPI, 7);
                                             //slide in the individual value into data_row;
                                             $offset = 12;
                                             $new_datarow = array_slice($data_row, 0, $offset, true) +
@@ -212,7 +212,7 @@ and open the template in the editor.
                                         <th><?php echo "(" . $data['staffid'] . ") " . $data['staffname']; ?></th>
                                         <th><?php echo "" . $data['machinename'] . " - " . $data['machinemodel']; ?></th>
                                         <th>&nbsp;</th>
-                                        <th><?php echo "Index Capacity Per Shift : ".$data['index_per_shift']; ?> </th>
+                                        <th><?php echo "Index Capacity Per Shift : " . $data['index_per_shift']; ?> </th>
                                     </tr>
                                 </table>
                                 <tr>
@@ -256,7 +256,7 @@ and open the template in the editor.
                                                 </tr>
                                                 <tr>
                                                     <td colspan="12" style="text-align:right"><b>Sum of Individual KPI :</b></td>
-                                                    <td><b><?php echo number_format(round($sum_invkpi,7),7); ?></b></td>
+                                                    <td><b><?php echo number_format(round($sum_invkpi, 7), 7); ?></b></td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -266,7 +266,7 @@ and open the template in the editor.
                                     <tr>
                                         <td colspan="2" style="width:auto;background-color:white">
                                             <?php
-                                            echo "<b>Total KPI = " . number_format(round($data['totalkpi'], 7),7) . "</b><br>";
+                                            echo "<b>Total KPI = " . number_format(round($data['totalkpi'], 7), 7) . "</b><br>";
                                             ?>
                                         </td>
                                         <td colspan="2" style="width:auto;background-color:white">
@@ -274,7 +274,11 @@ and open the template in the editor.
                                         </td>
                                         <td colspan="2" style="width:auto;background-color:white">
                                             <?php
-                                            $manual_calc = round($sum_totalweight / $data['index_per_shift'] * 9.8,7);
+                                            if ($data['index_per_shift'] != 0) {
+                                                $manual_calc = round($sum_totalweight / $data['index_per_shift'] * 9.8, 7);
+                                            } else {
+                                                $manual_calc = 0;
+                                            }
                                             echo "<b>$manual_calc</b>";
                                             ?>
                                         </td>
@@ -298,7 +302,7 @@ and open the template in the editor.
                                 <?php
                             }
                         }
-                    }else{
+                    } else {
                         echo "Cannot find data for $day-$month-$year";
                     }
                     ?>
