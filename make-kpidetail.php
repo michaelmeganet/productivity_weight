@@ -156,11 +156,17 @@
 
         function get_weightDetails($period, $nextPeriod, $date) {
             $prowtab = "production_weight_" . $period;
-            $prow2tab = "production_weight_" . $nextPeriod;
+            #$prow2tab = "production_weight_" . $nextPeriod;
+            
+            /** This is old version, now changed to include all data per period
             $qr = "(SELECT * FROM $prowtab WHERE DATE_FORMAT(dateofcompletion,'%Y %m') = DATE_FORMAT('$date','%Y %m')) ";
             if (check_table($prow2tab)) {
                 $qr .= "UNION (SELECT * FROM $prow2tab WHERE DATE_FORMAT(dateofcompletion,'%Y %m') = DATE_FORMAT('$date','%Y %m'))";
             }
+             * 
+             */
+            //new version, now fetches all data
+            $qr = "SELECT * FROM $prowtab";
             $objSQL = new SQL($qr);
             $result = $objSQL->getResultRowArray();
             if (!empty($result)) {
