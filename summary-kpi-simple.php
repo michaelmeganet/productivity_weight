@@ -221,7 +221,7 @@ and open the template in the editor.
                                     $det_KPI[] = array(
                                         'machinename' => $machinename,
                                         'weight_gain' => $sum_index_gain,
-                                        'totalkpi' => $sum_KPI,
+                                        'estimated_totalkpi' => $sum_KPI,
                                         'data_found' => $totaldata
                                     );
                                 }
@@ -291,6 +291,7 @@ and open the template in the editor.
                         }
                     } else {
                         ?>
+                            Estimated Unfinished KPI List by Virtual Machines (Based on process to choose the appropriated virtual machines)
                         <table>
                             <thead>
                                 <tr>
