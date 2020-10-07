@@ -158,7 +158,7 @@ and open the template in the editor.
                                             } else {
                                                 $inv_KPI = 0;
                                             }
-                                            $calculatedKPI += $inv_KPI;
+                                            $calculatedKPI += round($inv_KPI,7);
                                             //slide in the individual value into data_row;
                                             $offset = 12;
                                             $new_datarow = array_slice($data_row, 0, $offset, true) +
@@ -175,6 +175,7 @@ and open the template in the editor.
                                             'machineid' => $machineid,
                                             'machinename' => $machine_name,
                                             'machinemodel' => $machine_model,
+                                            'index_per_shift' => $index_per_shift,
                                             'totalkpi' => $calculatedKPI,
                                             'details' => $det_kpi_row_details
                                         );
@@ -208,8 +209,10 @@ and open the template in the editor.
                                 ?>
                                 <table style="width:auto">
                                     <tr>
-                                        <th><?php echo "(" . $data['staffid'] . ") " . $data['staffname']; ?></td>
-                                        <th><?php echo "" . $data['machinename'] . " - " . $data['machinemodel']; ?></td>
+                                        <th><?php echo "(" . $data['staffid'] . ") " . $data['staffname']; ?></th>
+                                        <th><?php echo "" . $data['machinename'] . " - " . $data['machinemodel']; ?></th>
+                                        <th>&nbsp;</th>
+                                        <th><?php echo "Index Capacity Per Shift : ".$data['index_per_shift']; ?> </th>
                                     </tr>
                                 </table>
                                 <tr>
@@ -234,6 +237,8 @@ and open the template in the editor.
                                             </thead>
                                             <tbody>
                                                 <?php
+                                                $sum_totalweight = 0;
+                                                $sum_invkpi = 0;
                                                 foreach ($details as $data_row) {
                                                     echo "<tr>";
                                                     #print_r();
@@ -241,19 +246,51 @@ and open the template in the editor.
                                                         echo "<td>$val</td>";
                                                     }
                                                     echo "</tr>";
+                                                    $sum_totalweight += floatval($data_row['total_weight']);
+                                                    $sum_invkpi += floatval($data_row['individual_kpi']);
                                                 }
                                                 ?>
-
+                                                <tr>
+                                                    <td colspan="11" style="text-align:right"><b>Sum of Total Weight :</b></td>
+                                                    <td><b><?php echo $sum_totalweight; ?></b></td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="12" style="text-align:right"><b>Sum of Individual KPI :</b></td>
+                                                    <td><b><?php echo number_format(round($sum_invkpi,7),7); ?></b></td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </td>
                                 </tr>
                                 <table style="width:auto">
                                     <tr>
-                                        <td colspan="2" style="width:auto">
+                                        <td colspan="2" style="width:auto;background-color:white">
                                             <?php
                                             echo "<b>Total KPI = " . number_format(round($data['totalkpi'], 7),7) . "</b><br>";
                                             ?>
+                                        </td>
+                                        <td colspan="2" style="width:auto;background-color:white">
+                                            &nbsp;
+                                        </td>
+                                        <td colspan="2" style="width:auto;background-color:white">
+                                            <?php
+                                            $manual_calc = round($sum_totalweight / $data['index_per_shift'] * 9.8,7);
+                                            echo "<b>$manual_calc</b>";
+                                            ?>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" style="width:auto;background-color:white">
+                                            <?php
+                                            echo "<b>Result by Program Calculation</b><br>";
+                                            ?>
+                                        </td>
+                                        <td colspan="2" style="width:auto;background-color:white">
+                                            &nbsp;
+                                        </td>
+                                        <td colspan="2" style="width:auto;background-color:white">
+                                            <b>Result by Manual Calculation</b><br>
+                                            Sum of Total Weight / Index Capacity Per Shift * 9.8
                                         </td>
                                     </tr>
                                 </table>
