@@ -37,11 +37,10 @@ and open the template in the editor.
                     <select v-model='period' id='period' name='period' @change="summType=''">
                         <option v-for='data in periodList' v-bind:value='data'>{{data}}</option>
                     </select>
-                    <button type="submit" >Submit</button>
                 </div>
                 <div v-if='period!= ""'><!--summary monthly/daily area-->
                     Summary Type :
-                    <select v-model='summType' id='summType' name='summType' @change='day = ""'>
+                    <select v-model='summType' id='summType' name='summType' @change='day = "";jobstatus="finished"'>
                         <option value='all'>Monthly</option>
                         <option value='daily'>Daily</option>
                     </select>
@@ -50,12 +49,20 @@ and open the template in the editor.
                     Date :
                     <select v-model="day" id="day" name="day">
                         <option v-for="data in dayList" v-bind:value="data">{{data}}</option>
-                    </select>
+                    </select></br>
+                    Joblist Status :
+                    <input type='text' v-model='jobstatus' id='jobstatus' name='jobstatus' value='finished' readonly/>
                     <button type="submit" >Submit</button>
                 </div>
                 <div v-else-if='summType != "daily" && summType!=""'>
                     Date :
-                    <input type='text' id='day' name='day' value='Show All' readonly/>
+                    <input type='text' id='day' name='day' value='Show All' readonly /></br>
+                    Joblist Status :         
+                    <select v-model='jobstatus' id="jobstatus" name="jobstatus">
+                        <option value="finished">Finished</option>
+                        <option value="unfinished">Unfinished</option>
+                    </select>           
+                    <button type="submit" >Submit</button>
                 </div>
             </form>
             <br>
@@ -65,11 +72,13 @@ and open the template in the editor.
                 include_once 'class/dbh.inc.php';
                 include_once 'class/variables.inc.php';
                 include_once 'class/phhdate.inc.php';
+                include_once 'class/joblistwork.inc.php';
 
-                if (isset($_POST['period']) && isset($_POST['summType']) && isset($_POST['day'])) {
+                if (isset($_POST['period']) && isset($_POST['summType']) && isset($_POST['day']) && isset($_POST['jobstatus'])) {
                     $period = $_POST['period'];
                     $summType = $_POST['summType'];
                     $i_day = $_POST['day'];
+                    $jobstatus = $_POST['jobstatus'];
                     $kpidetailstable = 'kpidetails_' . $period;
                     $year = '20' . substr($period, 0, 2);
                     $month = substr($period, 2, 2);
@@ -95,107 +104,158 @@ and open the template in the editor.
                         echo "<h2>DATE = $month-$year</h2><br>";
                     }
                     echo "</div>";
-                    for ($i = $i_day; $i <= $totaldate; $i++) {
-                        $day = sprintf('%02d', $i);
-                        $date = $year . '-' . $month . '-' . $day;
-                        #echo "<h3>Processing Date '$date'</h3><br>";
-                        try {
-                            $staffList = get_distinctStaff($kpidetailstable, $date, $summType);
-                            if ($staffList == 'empty') {
-                                throw new Exception('There\'s no staff found!', 101);
-                            }
-                            #echo "<span style= 'color:white;background-color:blue'>found " . count($staffList) . " staff</span><br>";
-                            foreach ($staffList as $data_staff) {
-                                $staffid = $data_staff['staffid'];
-                                $staffDetails = get_staffDetails($staffid);
-                                if ($staffDetails != 'empty') {
-                                    $staffname = $staffDetails['name'];
-                                } else {
-                                    $staffname = null;
-                                }
-                                $machineList = get_distinctMachine($kpidetailstable, $date, $summType, $staffid);
-                                #echo "<span style= 'color:white;background-color:black'>found " . count($machineList) . " machines</span><br>";
-                                foreach ($machineList as $data_machine) {
-                                    $mcid = $data_machine['mcid'];
-                                    $machineid = $data_machine['machineid'];
-                                    $mcDetail = get_machineDetails($mcid);
-                                    if ($mcDetail != 'empty') {
-                                        #echo "<pre>MachineLists : ";
-                                        #print_r($mcDetail);
-                                        #echo "</pre>";
-                                        $machine_name = $mcDetail['name'];
-                                        $machine_model = $mcDetail['model'];
-                                        $index_per_hour = $mcDetail['index_per_hour'];
-                                        $index_per_shift = $index_per_hour * 8;
-                                    } else {
-                                        $machine_name = null;
-                                        $machine_model = null;
-                                        $index_per_hour = null;
-                                        $index_per_shift = null;
-                                    }
-                                    $filteredDetails = get_filteredDetails($kpidetailstable, $date, $summType, $staffid, $mcid);
-                                    if ($filteredDetails != 'empty') {
-                                        //begin calculate kpi (based on staffid and mcid
-                                        $calculatedKPI = 0;
-                                        $cnt = 0;
-                                        foreach ($filteredDetails as $data_row) {
-                                            $cnt++;
-                                            $jd_qty = $data_row['jobdonequantity'];
-                                            $unit_weight = $data_row['unit_weight'];
-                                            $start_time = $data_row['start_time'];
-                                            $end_time = $data_row['end_time'];
-                                            if ($jd_qty) {
-                                                $index_gain_in_kg = $jd_qty * $unit_weight;
-                                            } else {
-                                                $index_gain_in_kg = 0;
-                                            }
-                                            //fetch current KPI
-                                            $kpiVal = get_kpiTimeTableDetails($start_time);
-                                            #echo "kpiVal = $kpiVal<br>";
-                                            $single_KPI = ($index_gain_in_kg * $kpiVal);
-                                            if ($index_per_shift) {
-                                                $inv_KPI = $single_KPI / $index_per_shift;
-                                            } else {
-                                                $inv_KPI = 0;
-                                            }
-                                            $calculatedKPI += round($inv_KPI, 7);
-                                            //slide in the individual value into data_row;
-                                            $offset = 12;
-                                            $new_datarow = array_slice($data_row, 0, $offset, true) +
-                                                    array('individual_kpi' => number_format(round($inv_KPI, 7), 7)) +
-                                                    array_slice($data_row, $offset, NULL, true);
-                                            #$data_row['individual_kpi'] = $inv_KPI;
-                                            $det_kpi_row_details[] = $new_datarow;
+                    if ($jobstatus == 'unfinished') {
+                        $qrU = "SELECT * FROM $kpidetailstable WHERE poid IS NULL AND jlfor = 'CJ'";
+                        $objSQLU = new SQL($qrU);
+                        $kpiData = $objSQLU->getResultRowArray();
+                        echo "qr = $qrU<br>";
+                        echo "Found " . count($kpiData) . " Datas.<br>";
+                        #echo "<pre>";
+                        #print_r($result);
+                        #echo "</pre>";
+                        $unfinKPIDetails = array();
+                        foreach ($kpiData as $data_row) {
+                            $schedulingtable = "production_scheduling_$period";
+                            $jobcode = $data_row['jobcode'];
+                            $cuttingtype = $data_row['cuttingtype'];
+                            $sid = $data_row['sid'];
+                            $qrSID = "SELECT process FROM $schedulingtable WHERE sid = $sid";
+                            $objSQLSID = NEW SQL($qrSID);
+                            $resultProcessCode = $objSQLSID->getResultOneRowArray();
+                            $processcode = $resultProcessCode['process'];
+                            $totalquantity = $data_row['totalquantity'];
+                            $objJWDetail = new JOB_WORK_DETAIL($jobcode, $cuttingtype, $processcode, $totalquantity);
+                            $ex_jobwork = $objJWDetail->get_ex_jobWork();
+                            #echo "sid = $sid; jobcode = $jobcode; cuttingtype = $cuttingtype; processcode = $processcode; totalquantity = $totalquantity<br>";
+                            #print_r($ex_jobwork);
+                            #echo "<br>";
+                            if ($ex_jobwork['millingwidth'] == 'true' && $ex_jobwork['millinglength'] == 'true') {
+                                
+                            } else {
+                                foreach ($ex_jobwork as $processname => $processstatus) {
+                                    if ($processstatus == 'true') {
+                                        $rand_index_per_shift = get_randomVirtualValues($processname);
+                                        $unit_weight = $data_row['unit_weight'];
+                                        if ($totalquantity != 0) {
+                                            $index_gain_in_kg = $unit_weight * $totalquantity;
+                                        } else {
+                                            $index_gain_in_kg = 0;
                                         }
-                                        //create array of the current sum
-                                        #echo "Generating staffid = $staffid, machine id = $machineid<br>Found $cnt Data<br> <strong>Total KPI is $calculatedKPI.</strong><br>";
-                                        $det_kpi_row[] = array(
-                                            'staffid' => $staffid,
-                                            'staffname' => $staffname,
-                                            'machineid' => $machineid,
-                                            'machinename' => $machine_name,
-                                            'machinemodel' => $machine_model,
-                                            'index_per_shift' => $index_per_shift,
-                                            'totalkpi' => $calculatedKPI,
-                                            'details' => $det_kpi_row_details
-                                        );
-                                        unset($det_kpi_row_details);
-                                    } else {
-                                        
+                                        $inv_Nu_KPI = $index_gain_in_kg / $rand_index_per_shift * 9.8;
+                                        //slide in the individual value into data_row;
+                                        $offset = 12;
+                                        $data_row['index_gain_in_kg'] = $index_gain_in_kg;
+                                        $new_datarow = array_slice($data_row, 0, $offset, true) +
+                                                array('individual_kpi' => number_format(round($inv_Nu_KPI, 7), 7)) +
+                                                array_slice($data_row, $offset, NULL, true);
+                                        $unfinKPIDetails[$processname][] = $new_datarow;
                                     }
                                 }
-                            }
-                        } catch (Exception $ex) {
-                            $code = $ex->getCode();
-                            switch ($code) {
-                                case 101: //cannot find staff list
-                                    #echo "Cannot find Staff for period = $period.<br>";
-                                    break;
                             }
                         }
-                        if (isset($det_kpi_row)) {
-                            $det_KPI[$date] = $det_kpi_row;
-                            unset($det_kpi_row);
+                    } else {
+                        for ($i = $i_day; $i <= $totaldate; $i++) {
+                            $day = sprintf('%02d', $i);
+                            $date = $year . '-' . $month . '-' . $day;
+                            #echo "<h3>Processing Date '$date'</h3><br>";
+                            try {
+                                $staffList = get_distinctStaff($kpidetailstable, $date, $summType);
+                                if ($staffList == 'empty') {
+                                    throw new Exception('There\'s no staff found!', 101);
+                                }
+                                #echo "<span style= 'color:white;background-color:blue'>found " . count($staffList) . " staff</span><br>";
+                                foreach ($staffList as $data_staff) {
+                                    $staffid = $data_staff['staffid'];
+                                    $staffDetails = get_staffDetails($staffid);
+                                    if ($staffDetails != 'empty') {
+                                        $staffname = $staffDetails['name'];
+                                    } else {
+                                        $staffname = null;
+                                    }
+                                    $machineList = get_distinctMachine($kpidetailstable, $date, $summType, $staffid);
+                                    #echo "<span style= 'color:white;background-color:black'>found " . count($machineList) . " machines</span><br>";
+                                    foreach ($machineList as $data_machine) {
+                                        $mcid = $data_machine['mcid'];
+                                        $machineid = $data_machine['machineid'];
+                                        $mcDetail = get_machineDetails($mcid);
+                                        if ($mcDetail != 'empty') {
+                                            #echo "<pre>MachineLists : ";
+                                            #print_r($mcDetail);
+                                            #echo "</pre>";
+                                            $machine_name = $mcDetail['name'];
+                                            $machine_model = $mcDetail['model'];
+                                            $index_per_hour = $mcDetail['index_per_hour'];
+                                            $index_per_shift = $index_per_hour * 8;
+                                        } else {
+                                            $machine_name = null;
+                                            $machine_model = null;
+                                            $index_per_hour = null;
+                                            $index_per_shift = null;
+                                        }
+                                        $filteredDetails = get_filteredDetails($kpidetailstable, $date, $summType, $staffid, $mcid);
+                                        if ($filteredDetails != 'empty') {
+                                            //begin calculate kpi (based on staffid and mcid
+                                            $calculatedKPI = 0;
+                                            $cnt = 0;
+                                            foreach ($filteredDetails as $data_row) {
+                                                $cnt++;
+                                                $jd_qty = $data_row['jobdonequantity'];
+                                                $unit_weight = $data_row['unit_weight'];
+                                                $start_time = $data_row['start_time'];
+                                                $end_time = $data_row['end_time'];
+                                                if ($jd_qty) {
+                                                    $index_gain_in_kg = $jd_qty * $unit_weight;
+                                                } else {
+                                                    $index_gain_in_kg = 0;
+                                                }
+                                                //fetch current KPI
+                                                $kpiVal = get_kpiTimeTableDetails($start_time);
+                                                #echo "kpiVal = $kpiVal<br>";
+                                                $single_KPI = ($index_gain_in_kg * $kpiVal);
+                                                if ($index_per_shift) {
+                                                    $inv_KPI = $single_KPI / $index_per_shift;
+                                                } else {
+                                                    $inv_KPI = 0;
+                                                }
+                                                $calculatedKPI += round($inv_KPI, 7);
+                                                //slide in the individual value into data_row;
+                                                $offset = 12;
+                                                $new_datarow = array_slice($data_row, 0, $offset, true) +
+                                                        array('individual_kpi' => number_format(round($inv_KPI, 7), 7)) +
+                                                        array_slice($data_row, $offset, NULL, true);
+                                                #$data_row['individual_kpi'] = $inv_KPI;
+                                                $det_kpi_row_details[] = $new_datarow;
+                                            }
+                                            //create array of the current sum
+                                            #echo "Generating staffid = $staffid, machine id = $machineid<br>Found $cnt Data<br> <strong>Total KPI is $calculatedKPI.</strong><br>";
+                                            $det_kpi_row[] = array(
+                                                'staffid' => $staffid,
+                                                'staffname' => $staffname,
+                                                'machineid' => $machineid,
+                                                'machinename' => $machine_name,
+                                                'machinemodel' => $machine_model,
+                                                'index_per_shift' => $index_per_shift,
+                                                'totalkpi' => $calculatedKPI,
+                                                'details' => $det_kpi_row_details
+                                            );
+                                            unset($det_kpi_row_details);
+                                        } else {
+                                            
+                                        }
+                                    }
+                                }
+                            } catch (Exception $ex) {
+                                $code = $ex->getCode();
+                                switch ($code) {
+                                    case 101: //cannot find staff list
+                                        #echo "Cannot find Staff for period = $period.<br>";
+                                        break;
+                                }
+                            }
+                            if (isset($det_kpi_row)) {
+                                $det_KPI[$date] = $det_kpi_row;
+                                unset($det_kpi_row);
+                            }
                         }
                     }
                     #echo "<pre>"
@@ -421,6 +481,7 @@ var sumKPIVue = new Vue({
         summType: '',
         day: '',
         loading: false,
+        jobstatus: 'finished',
 
         periodList: '',
         dayList: '',
@@ -430,6 +491,10 @@ var sumKPIVue = new Vue({
         summType: function () {
             if (this.summType === 'daily') {
                 this.getDayList();
+                this.jobstatus = 'finished';
+            }else{
+                this.day = 'Show All';
+                this.jobstatus = 'finished';
             }
         }
     },
