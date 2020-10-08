@@ -63,7 +63,15 @@ and open the template in the editor.
                </tr>
                <tr>
                    <td>&nbsp;&nbsp;</td>
-                   <td><a href="./summary-kpi.php">view KPI Summary (Detailed)</a></td>
+                   <td><a href="./summary-kpi.php">view KPI Summary By Staff (Detailed)</a></td>
+               </tr>
+               <tr>
+                   <td>&nbsp;&nbsp;</td>
+                   <td><a href="./summary-kpi-machine.php">view KPI Summary By Machine (Detailed)</a></td>
+               </tr>
+               <tr>
+                   <td>&nbsp;&nbsp;</td>
+                   <td><a href="./summary-kpi-unfin.php">View estimated KPI Summary for Unfinished Jobs (Detailed)</a></td>
                </tr>
            </table>
        

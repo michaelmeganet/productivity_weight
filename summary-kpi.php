@@ -37,7 +37,6 @@ and open the template in the editor.
                     <select v-model='period' id='period' name='period' @change="summType=''">
                         <option v-for='data in periodList' v-bind:value='data'>{{data}}</option>
                     </select>
-                    <button type="submit" >Submit</button>
                 </div>
                 <div v-if='period!= ""'><!--summary monthly/daily area-->
                     Summary Type :
@@ -237,6 +236,7 @@ and open the template in the editor.
                                             </thead>
                                             <tbody>
                                                 <?php
+                                                $sum_manual_invkpi = 0;
                                                 $sum_totalweight = 0;
                                                 $sum_invkpi = 0;
                                                 foreach ($details as $data_row) {
@@ -246,6 +246,18 @@ and open the template in the editor.
                                                         echo "<td>$val</td>";
                                                     }
                                                     echo "</tr>";
+                                                    $unit_weight = $data_row['unit_weight'];
+                                                    $qty = $data_row['jobdonequantity'];
+                                                    $totalweight = $qty * $unit_weight;
+                                                    #$totalweight = $data_row['total_weight'];
+                                                    $start_time = $data_row['start_time'];
+                                                    $manual_kpiVal = get_kpiTimeTableDetails($start_time);
+                                                    if ($data['index_per_shift'] != 0){
+                                                        $manual_invkpi = round(($totalweight / $data['index_per_shift'] * $manual_kpiVal),7);
+                                                    }else{
+                                                        $manual_invkpi = 0;
+                                                    }
+                                                    $sum_manual_invkpi += $manual_invkpi;
                                                     $sum_totalweight += floatval($data_row['total_weight']);
                                                     $sum_invkpi += floatval($data_row['individual_kpi']);
                                                 }
@@ -274,12 +286,7 @@ and open the template in the editor.
                                         </td>
                                         <td colspan="2" style="width:auto;background-color:white">
                                             <?php
-                                            if ($data['index_per_shift'] != 0) {
-                                                $manual_calc = round($sum_totalweight / $data['index_per_shift'] * 9.8, 7);
-                                            } else {
-                                                $manual_calc = 0;
-                                            }
-                                            echo "<b>$manual_calc</b>";
+                                            echo "<b>".number_format(round($sum_manual_invkpi,7),7)."</b>";
                                             ?>
                                         </td>
                                     </tr>
@@ -294,7 +301,7 @@ and open the template in the editor.
                                         </td>
                                         <td colspan="2" style="width:auto;background-color:white">
                                             <b>Result by Manual Calculation</b><br>
-                                            Sum of Total Weight / Index Capacity Per Shift * 9.8
+                                            Sum of Total Weight / Index Capacity Per Shift * KPI Value per Shift
                                         </td>
                                     </tr>
                                 </table>

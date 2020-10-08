@@ -169,7 +169,7 @@ Class SQL extends Dbh {
         $stmt = $this->connect()->prepare($sql);
         //echo "list down the content of \$stmt <br>";
         //print_r($stmt);
-        echo "<br>";
+        #echo "<br>";
         $stmt->execute();
         $number_of_rows = $stmt->fetchColumn();
         // echo "\$number_of_rows =  $number_of_rows <br>";
@@ -201,7 +201,7 @@ Class SQL extends Dbh {
         } else {
             $result = 'insert fail';
         }
-        echo "\$result = $result <br>";
+        #echo "\$result = $result <br>";
         return $result;
     }
 
@@ -248,7 +248,7 @@ Class SQLBINDPARAM extends SQL {
             ${$key} = $value;
             $bindValue = $key;
             $bindParamdata = "bindParam(:{$bindValue}, $$bindValue) == ".$$bindValue; //this is for debugging purposes
-            echo "\$bindParamdata = $bindParamdata <br>";
+            #echo "\$bindParamdata = $bindParamdata <br>";
             #########################################################
             # this line not successful, how to check in the future
             //  $stmt->bindParam(":$key", $value);

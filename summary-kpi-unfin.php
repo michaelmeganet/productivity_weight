@@ -34,8 +34,14 @@ and open the template in the editor.
             <form action='' method='POST'>
                 <div> <!--period area-->
                     Period :
-                    <select v-model='period' id='period' name='period' @change="summType=''">
+                    <select v-model='period' id='period' name='period'>
                         <option v-for='data in periodList' v-bind:value='data'>{{data}}</option>
+                    </select>
+                </div>
+                <div> <!--Virtual Machine Area-->
+                    Process Name :
+                    <select v-model='processname' id='processname' name='processname'>
+                        <option v-for='data in processNames' v-bind:value='data'>{{data}}</option>
                     </select>
                     <button type="submit" >Submit</button>
                 </div>
@@ -49,8 +55,9 @@ and open the template in the editor.
                 include_once 'class/phhdate.inc.php';
                 include_once 'class/joblistwork.inc.php';
 
-                if (isset($_POST['period'])) {
+                if (isset($_POST['period']) && isset($_POST['processname'])) {
                     $period = $_POST['period'];
+                    $processname = $_POST['processname'];
                     $kpidetailstable = 'kpidetails_' . $period;
                     $year = '20' . substr($period, 0, 2);
                     $month = substr($period, 2, 2);
@@ -66,10 +73,11 @@ and open the template in the editor.
                         $overTxt = '(Last Date of Month)';
                     }
                     echo "<div style='text-align:center'>";
-                    
-                        echo "<b style='font-size:2em'>ESTIMATED KPI INDEX MONTHLY UNFINISHED JOBS DETAILS REPORT</b><br>";
-                        echo "<h2>PERIOD : 01-$month-$year to $noofdays-$month-$year  $overTxt </h2><br>";
-                        
+
+                    echo "<b style='font-size:2em'>ESTIMATED KPI INDEX MONTHLY UNFINISHED JOBS DETAILS REPORT</b><br>";
+                    echo "<b style='font-size:1.5em>PERIOD : 01-$month-$year to $noofdays-$month-$year  $overTxt </b><br>";
+                    echo "<h2>PROCESS NAME : ". strtoupper($processname)." </h2><br>";
+
                     echo "</div>";
 
                     $qrU = "SELECT * FROM $kpidetailstable WHERE poid IS NULL AND jlfor = 'CJ'";
@@ -99,8 +107,8 @@ and open the template in the editor.
                         if ($ex_jobwork['millingwidth'] == 'true' && $ex_jobwork['millinglength'] == 'true') {
                             
                         } else {
-                            foreach ($ex_jobwork as $processname => $processstatus) {
-                                if ($processstatus == 'true') {
+                            foreach ($ex_jobwork as $key => $processstatus) {
+                                if ($processstatus == 'true' && $processname == $key) {
                                     $rand_index_per_shift = get_randomVirtualValues($processname);
                                     $unit_weight = $data_row['unit_weight'];
                                     if ($totalquantity != 0) {
@@ -135,43 +143,46 @@ and open the template in the editor.
                                 </tr>
                             </thead>
                         </table>
-                        <table>
-                            <thead>
-                                <?php
-                                foreach ($detail_row as $val_row) {
-                                    echo "<tr>";
-                                    foreach ($val_row as $key => $val) {
-                                        echo "<td>$key</td>";
+                            <table>
+                                <thead>
+                                    <?php
+                                    foreach ($detail_row as $val_row) {
+                                        echo "<tr>";
+                                        foreach ($val_row as $key => $val) {
+                                            echo "<td>$key</td>";
+                                        }
+                                        echo "</tr>";
+                                        break;
                                     }
-                                    echo "</tr>";
-                                    break;
-                                }
-                                ?>
-                            </thead>
-                            <tbody>
-                                <?php
-                                $sum_totalweight = 0;
-                                $sum_invkpi = 0;
-                                foreach ($detail_row as $val_row) {
-                                    echo "<tr>";
-                                    foreach ($val_row as $key => $val) {
-                                        echo "<td>$val</td>";
+                                    ?>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $sum_totalweight = 0;
+                                    $sum_invkpi = 0;
+                                    foreach ($detail_row as $val_row) {
+                                        echo "<tr>";
+                                        foreach ($val_row as $key => $val) {
+                                            echo "<td>$val</td>";
+                                        }
+                                        echo "</tr>";
+                                        $sum_totalweight += floatval($val_row['total_weight']);
+                                        $sum_invkpi += floatval($val_row['estimated_individual_kpi']);
                                     }
-                                    echo "</tr>";
-                                    $sum_totalweight += floatval($val_row['total_weight']);
-                                    $sum_invkpi += floatval($val_row['estimated_individual_kpi']);
-                                }
-                                ?>
-                                <tr>
-                                    <td colspan="11" style="text-align:right"><b>Sum of Total Weight :</b></td>
-                                    <td><b><?php echo $sum_totalweight; ?></b></td>
-                                </tr>
-                                <tr>
-                                    <td colspan="12" style="text-align:right"><b>Sum of Estimated Individual KPI :</b></td>
-                                    <td><b><?php echo number_format(round($sum_invkpi, 7), 7); ?></b></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                    ?>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="11" style="text-align:right"><b>Sum of Total Weight :</b></td>
+                                        <td><b><?php echo $sum_totalweight; ?></b></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="12" style="text-align:right"><b>Sum of Estimated Individual KPI :</b></td>
+                                        <td><b><?php echo number_format(round($sum_invkpi, 7), 7); ?></b></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                         <table>
                             <thead>
                                 <tr>
@@ -372,10 +383,12 @@ var sumKPIVue = new Vue({
         summType: '',
         day: '',
         loading: false,
+        processname: '',
 
         periodList: '',
         dayList: '',
-        kpiList: ''
+        kpiList: '',
+        processNames:['cncmachining','bandsaw','manual','milling','millingwidth','millinglength','roughgrinding','precisiongrinding']
     },
     watch: {
         summType: function () {
