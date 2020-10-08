@@ -55,6 +55,7 @@ and open the template in the editor.
                 <div v-else-if='summType != "daily" && summType!=""'>
                     Date :
                     <input type='text' id='day' name='day' value='Show All' readonly/>
+                    <button type="submit" >Submit</button>
                 </div>
             </form>
             <br>
