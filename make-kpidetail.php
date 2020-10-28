@@ -159,9 +159,9 @@
             $prow2tab = "production_weight_" . $nextPeriod;
             
             // This is old version, now changed to include all data per period
-            $qr = "(SELECT * FROM $prowtab WHERE DATE_FORMAT(dateofcompletion,'%Y %m') = DATE_FORMAT('$date','%Y %m')) ";
+            $qr = "(SELECT * FROM $prowtab WHERE DATE_FORMAT(date_start,'%Y %m') = DATE_FORMAT('$date','%Y %m')) ";
             if (check_table($prow2tab)) {
-                $qr .= "UNION (SELECT * FROM $prow2tab WHERE DATE_FORMAT(dateofcompletion,'%Y %m') = DATE_FORMAT('$date','%Y %m'))";
+                $qr .= "UNION (SELECT * FROM $prow2tab WHERE DATE_FORMAT(date_start,'%Y %m') = DATE_FORMAT('$date','%Y %m'))";
             }
               
              //
