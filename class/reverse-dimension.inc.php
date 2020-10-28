@@ -161,7 +161,7 @@ class MATERIAL_PRICE_TABLE {
     protected $category;
 
     public function __construct($materialcode, $dimension_array_legacy) {
-        echo "start instantiate class MATERIAL_PRICE_TABLE <br>";
+        #echo "start instantiate class MATERIAL_PRICE_TABLE <br>";
         $this->materialcode = $materialcode;
         $this->dimension_array_legacy = $dimension_array_legacy;
         listArray2($dimension_array_legacy);
@@ -203,7 +203,7 @@ class MATERIAL_PRICE_TABLE {
     }
 
     public function grabParametersBymaterialcode($materialcode) {
-        echo "start grabParametersBymaterialcode <br>";
+        #echo "start grabParametersBymaterialcode <br>";
         $sql = "SELECT * FROM material2020 "
                 . "WHERE materialcode = '$materialcode'";
         $objSql = new SQL($sql);
@@ -591,7 +591,7 @@ class MATERIAL_SPECIAL_PRICE_CID extends MATERIAL_PRICE_TABLE {
     protected $volume;
 
     public function __construct($cid, $com, $materialcode, $dimension_array_legacy) {
-        echo "start instantiate class MATERIAL_SPECIAL_PRICE_CID <br>";
+        #echo "start instantiate class MATERIAL_SPECIAL_PRICE_CID <br>";
         $this->cid = $cid;
         $this->com = $com;
         parent::__construct($materialcode, $dimension_array_legacy);
