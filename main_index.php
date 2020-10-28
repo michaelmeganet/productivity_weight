@@ -264,7 +264,7 @@
                         $machineid = null;
                         $machineModel = null;
                         $model = null;
-                        $index_per_shift = null;
+                        $machine_capacity_per_shift = null;
                     }
 
                     //Begin check for qid, quono, and cid
@@ -389,7 +389,7 @@
                     unset($machineModel);
                     unset($model);
                     unset($packing);
-                    unset($index_per_shift);
+                    unset($machine_capacity_per_shift);
                 } catch (Exception $ex) {
                     echo "Item : sid = $sid; qid = $qid; quono = $quono; cid = $cid<br>" .
                     $ex->getMessage() . "<br>";
