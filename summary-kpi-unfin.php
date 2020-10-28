@@ -373,7 +373,6 @@ and open the template in the editor.
                 }
                 ?>
             </div>
-        </div>
         <script>
 var sumKPIVue = new Vue({
     el: '#mainArea',
