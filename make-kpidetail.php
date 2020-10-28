@@ -156,17 +156,17 @@
 
         function get_weightDetails($period, $nextPeriod, $date) {
             $prowtab = "production_weight_" . $period;
-            #$prow2tab = "production_weight_" . $nextPeriod;
+            $prow2tab = "production_weight_" . $nextPeriod;
             
-            /** This is old version, now changed to include all data per period
+            // This is old version, now changed to include all data per period
             $qr = "(SELECT * FROM $prowtab WHERE DATE_FORMAT(dateofcompletion,'%Y %m') = DATE_FORMAT('$date','%Y %m')) ";
             if (check_table($prow2tab)) {
                 $qr .= "UNION (SELECT * FROM $prow2tab WHERE DATE_FORMAT(dateofcompletion,'%Y %m') = DATE_FORMAT('$date','%Y %m'))";
             }
-             * 
-             */
+              
+             //
             //new version, now fetches all data
-            $qr = "SELECT * FROM $prowtab";
+            #$qr = "SELECT * FROM $prowtab";
             $objSQL = new SQL($qr);
             $result = $objSQL->getResultRowArray();
             if (!empty($result)) {
@@ -262,7 +262,7 @@
                             $jobtype = $prodOutArray['jobtype'];
                             $remainingquantity = $prodOutArray['remainingquantity'];
                             $jobdonequantity = $prodOutArray['quantity'];
-                            $index_gain_in_kg = round($jobdonequantity * $unit_weight, 2);
+                            $unit_gain_kg = round($jobdonequantity * $unit_weight, 2);
                             $start_time = $prodOutArray['date_start'];
                             $end_time = $prodOutArray['date_end'];
                             #echo "start = $start_time; end = $end_time;\n";
@@ -283,7 +283,7 @@
                             $jobtype = null;
                             $remainingquantity = null;
                             $jobdonequantity = null;
-                            $index_gain_in_kg = 0;
+                            $unit_gain_kg = 0;
                             $start_time = null;
                             $end_time = null;
                             #echo "start = $start_time; end = $end_time;\n";
@@ -305,7 +305,7 @@
                             'total_weight' => $total_weight,
                             'dimensions' => $dimensions,
                             'jlfor' => $jlfor,
-                            'index_gain_in_kg' => $index_gain_in_kg,
+                            'unit_gain_kg' => $unit_gain_kg,
                             'jobno' => $jobno,
                             'dateofcompletion' => $dateofcompletion,
                             'cid' => $cid,
@@ -362,9 +362,9 @@
                                     $upd_array['jobdonequantity'] = $jobdonequantity;
                                     unset($jobdonequantity);
                                 }
-                                if ($index_gain_in_kg != $existingData['index_gain_in_kg']) {
-                                    $upd_array['index_gain_in_kg'] = $index_gain_in_kg;
-                                    unset($index_gain_in_kg);
+                                if ($unit_gain_kg != $existingData['unit_gain_kg']) {
+                                    $upd_array['unit_gain_kg'] = $unit_gain_kg;
+                                    unset($unit_gain_kg);
                                 }
                                 if ($dateofcompletion != $existingData['dateofcompletion']) {
                                     $upd_array['dateofcompletion'] = $dateofcompletion;

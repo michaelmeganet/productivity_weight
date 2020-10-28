@@ -73,7 +73,7 @@ switch ($action) {
                         $jobtype = $prodOutArray['jobtype'];
                         $remainingquantity = $prodOutArray['remainingquantity'];
                         $jobdonequantity = $prodOutArray['quantity'];
-                        $index_gain_in_kg = round($jobdonequantity * $unit_weight, 2);
+                        $unit_gain_kg = round($jobdonequantity * $unit_weight, 2);
                         $start_time = $prodOutArray['date_start'];
                         $end_time = $prodOutArray['date_end'];
                         #echo "start = $start_time; end = $end_time;\n";
@@ -91,7 +91,7 @@ switch ($action) {
                         $jobtype = null;
                         $remainingquantity = null;
                         $jobdonequantity = null;
-                        $index_gain_in_kg = 0;
+                        $unit_gain_kg = 0;
                         $start_time = null;
                         $end_time = null;
                         #echo "start = $start_time; end = $end_time;\n";
@@ -112,7 +112,7 @@ switch ($action) {
                         'total_weight' => $total_weight,
                         'dimensions' => $dimensions,
                         'jlfor' => $jlfor,
-                        'index_gain_in_kg' => $index_gain_in_kg,
+                        'unit_gain_kg' => $unit_gain_kg,
                         'jobno' => $jobno,
                         'dateofcompletion' => $dateofcompletion,
                         'cid' => $cid,
@@ -157,9 +157,9 @@ switch ($action) {
                                 $upd_array['jobdonequantity'] = $jobdonequantity;
                                 unset($jobdonequantity);
                             }
-                            if ($index_gain_in_kg != $existingData['index_gain_in_kg']) {
-                                $upd_array['index_gain_in_kg'] = $index_gain_in_kg;
-                                unset($index_gain_in_kg);
+                            if ($unit_gain_kg != $existingData['unit_gain_kg']) {
+                                $upd_array['unit_gain_kg'] = $unit_gain_kg;
+                                unset($unit_gain_kg);
                             }
                             if ($dateofcompletion != $existingData['dateofcompletion']) {
                                 $upd_array['dateofcompletion'] = $dateofcompletion;

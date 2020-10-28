@@ -143,18 +143,18 @@ foreach($namelist as $array) {
                 //echo "sid = $sid<br>";
                 $startdate = $datarow['date_start'];
                 $model = $datarow['model'];
-                $index_gain_in_kg = $unit_weight * $quantity;
-                $index_per_shift = $datarow['index_per_shift'];
-                if(isset($index_gain_in_kg)){
-                    $index_gain_in_kg = floatval($index_gain_in_kg) * 9.8;
+                $unit_gain_kg = $unit_weight * $quantity;
+                $machine_capacity_per_shift = $datarow['machine_capacity_per_shift'];
+                if(isset($unit_gain_kg)){
+                    $unit_gain_kg = floatval($unit_gain_kg) * 9.8;
                     #$index_gain_in_kg = floatval($index_gain_in_kg);
-                    $index_gain = $index_gain + $index_gain_in_kg;
+                    $index_gain = $index_gain + $unit_gain_kg;
                 }
         
                 
             echo 
             "<tr>
-                <td>$sid</td><td>$qid</td><td>$jobcode</td><td>$grade</td><td>$quantity</td><td>$unit_weight</td><td>$total_weight</td><td>$dimension</td><td>$jlfor</td><td>$index_gain_in_kg</td>
+                <td>$sid</td><td>$qid</td><td>$jobcode</td><td>$grade</td><td>$quantity</td><td>$unit_weight</td><td>$total_weight</td><td>$dimension</td><td>$jlfor</td><td>$unit_gain_kg</td>
                 <td>$jobno</td><td>$dateofcompletion</td><td>$cid</td><td>$cuttingtype</td><td>$staffname</td><td>$machineid</td><td>$machineName</td>
                 <td>$startdate</td><td>$model</td>
             
@@ -182,18 +182,18 @@ foreach($namelist as $array) {
         echo "</table></div>";
         echo "\$count = $count , \$recordCount = $recordCount <br>";
         if($count == $recordCount){
-            if($index_per_shift > 0.00){
+            if($machine_capacity_per_shift > 0.00){
             #$KPI_weekday  = number_format($index_gain/$index_per_shift * 9.8, 2);
             #$KPI_holiday = number_format($index_gain/$index_per_shift * 7.35, 2);
-            $KPI_weekday  = number_format($index_gain/$index_per_shift, 2);
-            $KPI_holiday = number_format($index_gain/$index_per_shift, 2);
+            $KPI_weekday  = number_format($index_gain/$machine_capacity_per_shift, 2);
+            $KPI_holiday = number_format($index_gain/$machine_capacity_per_shift, 2);
             }else{
                 $KPI_weekday = "no value";
                 $KPI_holiday = "no value";
             }
 
             echo "The total index gain in KG for $value is $index_gain <br>";
-            echo "The index per shift of $model, $machineid  -  $machineName is $index_per_shift <br> ";
+            echo "The index per shift of $model, $machineid  -  $machineName is $machine_capacity_per_shift <br> ";
             echo "The weekday KPI is $KPI_weekday <br>";
             $index_gain = 0;
         }

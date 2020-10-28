@@ -258,8 +258,8 @@
                         $machineid = $results4['machineid'];
                         $machineModel = $results4['name'];
                         $model = $results4['model'];
-                        $index_per_hour = $results4['index_per_hour'];
-                        $index_per_shift = $index_per_hour * 8;
+                        $machine_capacity_per_hour = $results4['index_per_hour'];
+                        $machine_capacity_per_shift = $machine_capacity_per_hour * 8;
                     } else {
                         $machineid = null;
                         $machineModel = null;
@@ -336,7 +336,7 @@
                     . " noposition = $noposition | runningno = $runningno | jobno = $jobno | date_issue = $date_issue | "
                     . " completion_date = $completion_date | dateofcompletion = $dateofcompletion | jlfor = $jlfor | status = $status | "
                     . " staffname = $staffname |  machineModel  = $machineModel | model = $model | date_start = $date_start | end_date = $end_date | packing = $packing  | operation = $operation | unit_weight = $weight | "
-                    . " total_weight = $total_weight | index_per_shift = $index_per_shift <br>";
+                    . " total_weight = $total_weight | machine_capacity_per_shift = $machine_capacity_per_shift <br>";
                     echo"################################################################################<br>";
                     $insertArray["wid"] = null;
                     $insertArray["sid"] = $sid;
@@ -372,7 +372,7 @@
                     $insertArray["operation"] = $operation;
                     $insertArray["unit_weight"] = $weight;
                     $insertArray["total_weight"] = $total_weight;
-                    $insertArray["index_per_shift"] = $index_per_shift;
+                    $insertArray["machine_capacity_per_shift"] = $machine_capacity_per_shift;
                     print_r($insertArray);
                     echo "<br>";
                     echo "insert an array into $table <br>";
@@ -451,9 +451,9 @@
                         $updateArray['packing'] = $packing;
                         unset($packing);
                     }
-                    if (trim($index_per_shift) != trim($proweight_data['index_per_shift'])) {
-                        $updateArray['index_per_shift'] = $index_per_shift;
-                        unset($index_per_shift);
+                    if (trim($machine_capacity_per_shift) != trim($proweight_data['machine_capacity_per_shift'])) {
+                        $updateArray['machine_capacity_per_shift'] = $machine_capacity_per_shift;
+                        unset($machine_capacity_per_shift);
                     }
 
                     if (!empty($updateArray)) {
