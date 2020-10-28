@@ -158,8 +158,8 @@ switch ($action) {
         #echo "arr_jobSchDetail = <br>";
         #print_r($arr_JobSchDetail[0]);
         #echo "<br>";
-
-        $objJWDetail = new JOB_WORK_DETAIL($arr_JobSchDetail[0]['cuttingtype'], $arr_JobSchDetail[0]['process'], $arr_JobOutDetail);
+        
+        $objJWDetail = new JOB_WORK_DETAIL($arr_JobSchDetail[0]['jobcode'],$arr_JobSchDetail[0]['cuttingtype'], $arr_JobSchDetail[0]['process'],$arr_JobSchDetail[0]['quantity'], $arr_JobOutDetail);
         $resultJWDetail = $objJWDetail->get_arr_jobWork();
         echo json_encode($resultJWDetail);
     default:
