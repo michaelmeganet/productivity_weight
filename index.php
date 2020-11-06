@@ -46,6 +46,36 @@ and open the template in the editor.
        <div>
        <a href="./schedule_output_test.php">check Scheduling output page</a>
        </div>
+       <div>
+       <a href="./make-kpidetail.php">generate KPI Details</a>
+       </div>
+       <div>
+       <a href="./show-kpidetail-table.php">view KPI Detail Table</a>
+       </div>
+       <div>
+           <table>
+               <tr>
+                   <td colspan="2">Show Summary : </td>
+               </tr>
+               <tr>
+                   <td>&nbsp;&nbsp;</td>
+                   <td><a href="./summary-kpi-simple.php">view KPI Monthly Summary (Simplified)</a></td>
+               </tr>
+               <tr>
+                   <td>&nbsp;&nbsp;</td>
+                   <td><a href="./summary-kpi.php">view KPI Summary By Staff (Detailed)</a></td>
+               </tr>
+               <tr>
+                   <td>&nbsp;&nbsp;</td>
+                   <td><a href="./summary-kpi-machine.php">view KPI Summary By Machine (Detailed)</a></td>
+               </tr>
+               <tr>
+                   <td>&nbsp;&nbsp;</td>
+                   <td><a href="./summary-kpi-unfin.php">View estimated KPI Summary for Unfinished Jobs (Detailed)</a></td>
+               </tr>
+           </table>
+       
+       </div>
  
         <script>
             var logVue = new Vue({
