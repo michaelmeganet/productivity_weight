@@ -405,7 +405,7 @@
                     }
                     if (trim($poid) != trim($proweight_data['poid'])) {
                         $updateArray['poid'] = $poid;
-                        unset($status);
+                        unset($poid);
                     }
                     if (trim($status) != trim($proweight_data['status'])) {
                         $updateArray['status'] = $status;
