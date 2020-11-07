@@ -59,28 +59,28 @@
             }
         }
 
-        function get_outputDetails($period, $nextPeriod, $poid, $sid) {
+        function get_outputDetails($period, $poid, $sid) {
             $prootab = "production_output_$period";
-            $proo2tab = "production_output_$nextPeriod";
+            #$proo2tab = "production_output_$nextPeriod";
             $qr = "(SELECT * FROM $prootab WHERE poid = $poid AND sid = $sid AND NOT jobtype = 'jobtake')";
             $objSQL = new SQL($qr);
             $result = $objSQL->getResultOneRowArray();
             if (!empty($result)) {
                 return $result;
-            } else {
-                if (check_table($proo2tab)) {
-                    $qr2 = "(SELECT * FROM $proo2tab WHERE poid = $poid AND sid = $sid AND NOT jobtype = 'jobtake')";
-                    $objSQL2 = new SQL($qr2);
-                    $result2 = $objSQL2->getResultOneRowArray();
-                    if (!empty($result2)) {
-                        return $result2;
-                    } else {
-                        Throw new Exception('Cannot find output data in ' . $proo2tab . '!', 113);
-                    }
+            #} else {
+            #    if (check_table($proo2tab)) {
+            #        $qr2 = "(SELECT * FROM $proo2tab WHERE poid = $poid AND sid = $sid AND NOT jobtype = 'jobtake')";
+            #        $objSQL2 = new SQL($qr2);
+            #        $result2 = $objSQL2->getResultOneRowArray();
+            #        if (!empty($result2)) {
+            #            return $result2;
+            #        } else {
+            #            Throw new Exception('Cannot find output data in ' . $proo2tab . '!', 113);
+            #        }
                 } else {
                     Throw new Exception('Cannot find output data in ' . $prootab . '!', 112);
                 }
-            }
+            #}
         }
 
         function update_KPI_Detail($updateArray, $period, $kpidid) {
@@ -175,17 +175,32 @@
                 Throw new Exception("$qr", 101);
             }
         }
+        function get_prevPeriod($period){
+            $y = (int)substr($period,0,2);
+            $m = (int)substr($period,2,2);
+            
+            if ($m == 1){
+                $newY = $y-1;
+                $newM = 12;
+            }else{
+                $newY = $y;
+                $newM = $m - 1;
+            }
+            $prevPeriod = sprintf('%02d',$newY).sprintf('%02d',$newM);
+            return $prevPeriod;
+        }
         ?>
         <?php
         if (isset($_POST['period'])) {
             $period = $_POST['period'];
+            $prevPeriod = get_prevPeriod($period);
         }
         if (isset($period)) {
-            $objNPeriod = new NextPeriod($period);
-            $nextPeriod = $objNPeriod->get_nextPeriod();
+            #$objNPeriod = new NextPeriod($period);
+            #$nextPeriod = $objNPeriod->get_nextPeriod();
             $year = '20' . substr($period, 0, 2);
             $month = substr($period, 2, 2);
-            $date = $year . '-' . $month . '-00';
+            $date = $year . '-' . $month . '-01';
 
 
             $cntIns = 0;
@@ -222,7 +237,7 @@
             // 'model' => $model,
             try {
 
-                $prodWArray = get_weightDetails($period, $nextPeriod, $date); //fetch data based on period
+                $prodWArray = get_weightDetails($period, $prevPeriod, $date); //fetch data based on period
                 echo "Found " . count($prodWArray) . " data.<br>";
                 #print_r($prodWArray);
                 //begin loop on production_weight data:
@@ -245,6 +260,8 @@
                         $dimensions = $prodWData['dimension'];
                         $jlfor = $prodWData['jlfor'];
                         $jobno = $prodWData['jobno'];
+                        $scheduling_period = substr($prodWData['completion_date'],2,2).substr($prodWData['completion_date'],5,2);
+                        echo "Scheduling Period found = $scheduling_period<br>";
                         $dateofcompletion = $prodWData['dateofcompletion'];
                         $cid = $prodWData['cid'];
                         $cuttingtype = $prodWData['cuttingtype'];
@@ -257,7 +274,7 @@
 
                         if ($poid) {
                             echo "Found poid = $poid<br>";
-                            $prodOutArray = get_outputDetails($period, $nextPeriod, $poid, $sid);
+                            $prodOutArray = get_outputDetails($scheduling_period, $poid, $sid);
                             #$kpidid++;
                             $jobtype = $prodOutArray['jobtype'];
                             $remainingquantity = $prodOutArray['remainingquantity'];
