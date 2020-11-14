@@ -407,8 +407,8 @@
                             unset($machine_capacity_per_shift);
                             break;
                         default: //there's data, so do update process
-                            echo "Item : sid = $sid; qid = $qid; quono = $quono; cid = $cid<br>" .
-                            $ex->getMessage() . "<br>";
+                            echo "Item : sid = $sid; qid = $qid; quono = $quono; cid = $cid<br>";
+                            echo "Data has been inputted<br>";
                             echo "Start Check if data updated or not :===<br><br>\n";
                             echo "proweight_data = ";
                             print_r($proweight_data);
